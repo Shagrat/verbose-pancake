@@ -20,7 +20,7 @@ BASE_IDENTITY = {
 
 BASE_VOCABULARY = {
     "@context": {
-        "@version": 1.1,
+        "@version": VERSION,
         "rdf": {
             "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             "@prefix": True
