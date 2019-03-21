@@ -1,0 +1,5 @@
+c4l16-ld-python==0.1
+isodate==0.6.0
+rdflib==4.2.2
+rdflib-jsonld==0.4.0
+six==1.12.0

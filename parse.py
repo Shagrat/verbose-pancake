@@ -1,25 +1,11 @@
 #!/usr/bin/python
 import sys
+import json
 from string import Template
 from rdflib import Graph, plugin, URIRef
 from rdflib.serializer import Serializer
 
-CONTEXT = {
-    "dli": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
-    "pot": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#",
-    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-    "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "owl": "http://www.w3.org/2002/07/owl#",
-    "vs": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
-    "dct": "http://purl.org/dc/terms/",
-    "dc": "http://purl.org/dc/elements/1.1/",
-    "cc": "http://creativecommons.org/ns#",
-    "rak": "http://uri.suomi.fi/datamodel/ns/rak#",
-    "vann": "http://purl.org/vocab/vann/",
-    "@vocab": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#",
-    "@base": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#"
-}
+VERSION = 1.1
 
 def main(filename):
     with open(filename) as f:
@@ -28,15 +14,30 @@ def main(filename):
     objects = g.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('https://platformoftrust.github.io/standards/ontologies/pot.jsonld#Class')))
     result_graphs = []
     for i in list(objects):
-        ng = Graph()
-        ng.add(i)
-        for predicate in list(g.triples((i[0], None, None))):
-            ng.add(predicate)
+        result_dict = {
+            '@version': VERSION,
+            '@vocab': "https://platformoftrust.github.io/standards/vocabularies/{}.jsonld#".format(i[0].split('#')[1].lower()),
+            "pot": {
+                "@id": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#",
+                "@prefix": True
+            },
+            "dli": {
+                "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+                "@prefix": True
+            },
+            "data": "dli:data",
+            "name": "pot:name",
+        }
         for domain in list(g.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), URIRef(i[0])))):
-            for subject in list(g.triples((domain[0], None, None))):
-                ng.add(subject)
-        with open('result/{}.jsonld'.format(i[0].split('#')[1]), 'wb') as f:
-            f.write(ng.serialize(format='json-ld', indent=4, context=CONTEXT))
+            key = domain[0].split('#')[1]
+            if key == 'name':
+                continue
+            result_dict[key] = {
+                '@id': 'pot:{}'.format(key),
+                '@nest': 'pot:data',
+            }
+        with open('result/identity-{}.jsonld'.format(i[0].split('#')[1].lower()), 'w') as f:
+            f.write(json.dumps({'@context': result_dict}, indent=4, separators=(',', ': ')))
     
 
 
