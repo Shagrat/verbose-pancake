@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import json
+import os
 from collections import namedtuple
 from copy import deepcopy
 from string import Template
@@ -70,6 +71,8 @@ def build_vocabulary(graph, class_triplet):
     ]
     for domain in map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject)))):
         key = domain.subject.split('#')[1]
+        if key.lower() == 'name':
+            continue
         title, description = get_title_and_description(domain.subject, graph)
         supported_types = get_supported_types(domain.subject, graph)
         supported_attribute = {
@@ -106,7 +109,7 @@ def parse(filename):
     with open(filename) as f:
         data = f.read()
     graph = Graph().parse(data=data, format='json-ld')
-    class_triples = graph.triples((URIRef("https://platformoftrust.github.io/standards/ontologies/pot.jsonld#Building"), URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('https://platformoftrust.github.io/standards/ontologies/pot.jsonld#Class')))
+    class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('https://platformoftrust.github.io/standards/ontologies/pot.jsonld#Class')))
     for class_triplet in map(Triplet._make, list(class_triples)):
         vocabulary_dict, vocabulary = build_vocabulary(graph, class_triplet)
         identity_dict = build_identity(graph, class_triplet, vocabulary)
@@ -123,5 +126,10 @@ if __name__ == "__main__":
     except IndexError:
         print('You have to select file to parse, please use: python parse.py <filename.jsonld>')
         exit()
+    try:
+        os.makedirs('identities')
+        os.makedirs('vocabularies')
+    except FileExistsError as e:
+        pass
     parse(filename)
     
