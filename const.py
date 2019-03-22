@@ -2,6 +2,8 @@ VERSION = 1.1
 LABEL_REF = 'http://www.w3.org/2000/01/rdf-schema#label'
 COMMENT_REF = 'http://www.w3.org/2000/01/rdf-schema#comment'
 RANGE_REF = 'http://www.w3.org/2000/01/rdf-schema#range'
+SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
+
 
 BASE_IDENTITY = {
     '@version': VERSION,
@@ -37,8 +39,8 @@ BASE_VOCABULARY = {
             "@id": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#",
             "@prefix": True
         },
-        "vocab": "https://platformoftrust.github.io/standards/vocabularies/building.jsonld#"
+        "vocab": "https://platformoftrust.github.io/standards/vocabularies/.jsonld#"
     },
-    "@id": "https://platformoftrust.github.io/standards/vocabularies/building.jsonld",
+    "@id": "https://platformoftrust.github.io/standards/vocabularies/.jsonld",
     "@type": "pot:Vocabulary",
 }

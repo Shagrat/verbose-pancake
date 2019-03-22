@@ -7,7 +7,7 @@ from copy import deepcopy
 from string import Template
 from rdflib import Graph, plugin, URIRef, Literal
 from rdflib.serializer import Serializer
-from const import BASE_IDENTITY, BASE_VOCABULARY, VERSION, LABEL_REF, COMMENT_REF, RANGE_REF
+from const import BASE_IDENTITY, BASE_VOCABULARY, VERSION, LABEL_REF, COMMENT_REF, RANGE_REF, SUBCLASS_REF
 
 Triplet = namedtuple('Triplet', 'subject, predicate, object')
 
@@ -35,7 +35,7 @@ def get_supported_types(subject_uriref, graph):
     supported_types = []
     for type_triplet in map(Triplet._make, list(graph.triples((subject_uriref, URIRef(RANGE_REF), None)))):
         supported_types.append('pot:{}'.format(type_triplet.object.split('#')[1]))
-    return ','.join(supported_types)
+    return supported_types
 
 
 
@@ -46,6 +46,11 @@ def build_vocabulary(graph, class_triplet):
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary[:-1]
     title, description = get_title_and_description(class_triplet.subject, graph)
+    total_attributes = []
+    parents =  map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None))))
+    for parent in parents:
+        total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
+    total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject))))
     supported_class = {
       "@id": "pot:{}".format(class_key),
       "@type": "pot:{}".format(class_key),
@@ -58,18 +63,18 @@ def build_vocabulary(graph, class_triplet):
           "dli:attribute": "pot:name",
           "dli:title": "name",
           "dli:description": "name",
-          "dli:required": False
+          "dli:required": True
         },
         {
           "@type": "pot:SupportedAttribute",
           "dli:attribute": "dli:data",
           "dli:title": "data",
           "dli:description": "data",
-          "dli:required": False,
+          "dli:required": True,
           "dli:valueType": "xsd:object"
         },
     ]
-    for domain in map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject)))):
+    for domain in total_attributes:
         key = domain.subject.split('#')[1]
         if key.lower() == 'name':
             continue
@@ -84,7 +89,8 @@ def build_vocabulary(graph, class_triplet):
         }
         if len(supported_types) > 0:
             supported_attribute['dli:valueType'] = supported_types
-        supported_attributes.append(supported_attribute)
+        if not next((attribute for attribute in supported_attributes if attribute["dli:attribute"] == supported_attribute["dli:attribute"]), None):
+            supported_attributes.append(supported_attribute)
     supported_class['pot:supportedAttribute'] = supported_attributes
     vocabulary_dict['pot:supportedClass'] = supported_class
 
@@ -95,7 +101,13 @@ def build_identity(graph, class_triplet, vocabulary):
     identity_dict = deepcopy(BASE_IDENTITY)
     identity_dict['@vocab'] = vocabulary
     rdf_class_uriref = class_triplet.subject
-    for domain in map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), rdf_class_uriref)))):
+    total_attributes = []
+    parents =  map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None))))
+    for parent in parents:
+        total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
+    total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject))))
+
+    for domain in total_attributes:
         key = domain.subject.split('#')[1]
         if key == 'name':
             continue
