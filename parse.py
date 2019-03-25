@@ -47,9 +47,14 @@ def build_vocabulary(graph, class_triplet):
     vocabulary_dict['@id'] = vocabulary[:-1]
     title, description = get_title_and_description(class_triplet.subject, graph)
     total_attributes = []
-    parents =  map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None))))
-    for parent in parents:
-        total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
+    parents =  list(map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None)))))
+    while len(parents):
+        tParents = []
+        for parent in parents:
+            total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
+            tParents +=  list(map(Triplet._make, list(graph.triples((parent.object, URIRef(SUBCLASS_REF), None)))))      
+        parents = tParents.copy()
+
     total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject))))
     supported_class = {
       "@id": "pot:{}".format(class_key),
@@ -102,9 +107,14 @@ def build_identity(graph, class_triplet, vocabulary):
     identity_dict['@vocab'] = vocabulary
     rdf_class_uriref = class_triplet.subject
     total_attributes = []
-    parents =  map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None))))
-    for parent in parents:
-        total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
+    parents =  list(map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None)))))
+    while len(parents):
+        tParents = []
+        for parent in parents:
+            total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
+            tParents +=  list(map(Triplet._make, list(graph.triples((parent.object, URIRef(SUBCLASS_REF), None)))))      
+        parents = tParents.copy()
+
     total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject))))
 
     for domain in total_attributes:
