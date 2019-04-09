@@ -7,8 +7,10 @@ from copy import deepcopy
 from string import Template
 from rdflib import Graph, plugin, URIRef, Literal
 from rdflib.serializer import Serializer
-from const import BASE_IDENTITY, BASE_VOCABULARY, VERSION, LABEL_REF, COMMENT_REF, RANGE_REF, SUBCLASS_REF
-
+from const import BASE_IDENTITY_POT, BASE_VOCABULARY_POT, VERSION, LABEL_REF, COMMENT_REF,\
+        RANGE_REF, SUBCLASS_REF, POT_BASE, DLI_BASE, BASE_IDENTITY_DLI, BASE_VOCABULARY_DLI,\
+        DLI_CONF_NAME
+from rdflib_jsonld.parser import Parser
 Triplet = namedtuple('Triplet', 'subject, predicate, object')
 
 
@@ -39,10 +41,10 @@ def get_supported_types(subject_uriref, graph):
 
 
 
-def build_vocabulary(graph, class_triplet):
+def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=BASE_VOCABULARY_POT, context_key='pot'):
     vocabulary_dict = deepcopy(BASE_VOCABULARY)
     class_key = class_triplet.subject.split('#')[1]
-    vocabulary = 'https://platformoftrust.github.io/standards/vocabularies/{}.jsonld#'.format(class_key.lower())
+    vocabulary = '{}vocabularies/{}.jsonld#'.format(PATH_BASE, class_key.lower())
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary[:-1]
     title, description = get_title_and_description(class_triplet.subject, graph)
@@ -57,21 +59,21 @@ def build_vocabulary(graph, class_triplet):
 
     total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), class_triplet.subject))))
     supported_class = {
-      "@id": "pot:{}".format(class_key),
-      "@type": "pot:{}".format(class_key),
+      "@id": "{}:{}".format(context_key, class_key),
+      "@type": "{}:{}".format(context_key, class_key),
       "dli:title": title,
       "dli:description": description,
     }
     supported_attributes = [
         {
-          "@type": "pot:SupportedAttribute",
-          "dli:attribute": "pot:name",
+          "@type": "{}:SupportedAttribute".format(context_key),
+          "dli:attribute": "{}:name".format(context_key),
           "dli:title": "name",
           "dli:description": "name",
           "dli:required": True
         },
         {
-          "@type": "pot:SupportedAttribute",
+          "@type": "{}:SupportedAttribute".format(context_key),
           "dli:attribute": "dli:data",
           "dli:title": "data",
           "dli:description": "data",
@@ -86,8 +88,8 @@ def build_vocabulary(graph, class_triplet):
         title, description = get_title_and_description(domain.subject, graph)
         supported_types = get_supported_types(domain.subject, graph)
         supported_attribute = {
-            "@type": "pot:SupportedAttribute",
-            "dli:attribute": "pot:{}".format(key),
+            "@type": "{}:SupportedAttribute".format(context_key),
+            "dli:attribute": "{}:{}".format(context_key, key),
             "dli:title": title,
             "dli:description": description,
             "dli:required": False
@@ -96,13 +98,13 @@ def build_vocabulary(graph, class_triplet):
             supported_attribute['dli:valueType'] = supported_types
         if not next((attribute for attribute in supported_attributes if attribute["dli:attribute"] == supported_attribute["dli:attribute"]), None):
             supported_attributes.append(supported_attribute)
-    supported_class['pot:supportedAttribute'] = supported_attributes
-    vocabulary_dict['pot:supportedClass'] = supported_class
+    supported_class['{}:supportedAttribute'.format(context_key)] = supported_attributes
+    vocabulary_dict['{}:supportedClass'.format(context_key)] = supported_class
 
     return vocabulary_dict, vocabulary
 
 
-def build_identity(graph, class_triplet, vocabulary):
+def build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_POT, context_key='pot'):
     identity_dict = deepcopy(BASE_IDENTITY)
     identity_dict['@vocab'] = vocabulary
     rdf_class_uriref = class_triplet.subject
@@ -122,8 +124,8 @@ def build_identity(graph, class_triplet, vocabulary):
         if key == 'name':
             continue
         identity_dict[key] = {
-            '@id': 'pot:{}'.format(key),
-            '@nest': 'pot:data',
+            '@id': '{}:{}'.format(context_key, key),
+            '@nest': '{}:data'.format(context_key),
         }
     return identity_dict
 
@@ -131,17 +133,37 @@ def parse(filename):
     with open(filename) as f:
         data = f.read()
     graph = Graph().parse(data=data, format='json-ld')
-    class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('https://platformoftrust.github.io/standards/ontologies/pot.jsonld#Class')))
+    class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/pot.jsonld#Class'.format(POT_BASE))))
     for class_triplet in map(Triplet._make, list(class_triples)):
         vocabulary_dict, vocabulary = build_vocabulary(graph, class_triplet)
         identity_dict = build_identity(graph, class_triplet, vocabulary)
 
-        with open('identities/identity-{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+        with open('result/pot/identities/identity-{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
-        with open('vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+        with open('result/pot/vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
+    
+    graph = Graph().parse('https://digitalliving.github.io/standards/ontologies/dli.jsonld', format='json-ld')
+    
+    classes_to_parse = []
+    with open(DLI_CONF_NAME) as f:
+        data = f.read()
+    try:
+        for c in json.loads(data):
+            classes_to_parse.append(URIRef(c.replace('dli:', '{}ontologies/dli.jsonld#'.format(DLI_BASE))))
+    except:
+        pass
+    class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/dli.jsonld#Class'.format(DLI_BASE))))
+    for class_triplet in map(Triplet._make, list(class_triples)):
+        if not class_triplet.subject in classes_to_parse:
+            continue
+        vocabulary_dict, vocabulary = build_vocabulary(graph, class_triplet, PATH_BASE=DLI_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli')
+        identity_dict = build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_DLI, context_key='dli')
 
-
+        with open('result/dli/identities/identity-{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+            f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
+        with open('result/dli/vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+            f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
 if __name__ == "__main__":
     try:
         filename = sys.argv[1]
@@ -149,8 +171,10 @@ if __name__ == "__main__":
         print('You have to select file to parse, please use: python parse.py <filename.jsonld>')
         exit()
     try:
-        os.makedirs('identities')
-        os.makedirs('vocabularies')
+        os.makedirs('result/pot/identities')
+        os.makedirs('result/pot/vocabularies')
+        os.makedirs('result/dli/identities')
+        os.makedirs('result/dli/vocabularies')
     except FileExistsError as e:
         pass
     parse(filename)

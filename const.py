@@ -3,13 +3,15 @@ LABEL_REF = 'http://www.w3.org/2000/01/rdf-schema#label'
 COMMENT_REF = 'http://www.w3.org/2000/01/rdf-schema#comment'
 RANGE_REF = 'http://www.w3.org/2000/01/rdf-schema#range'
 SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
+POT_BASE = 'https://standards.oftrust.net/'
+DLI_BASE = 'https://digitalliving.github.io/standards/'
+DLI_CONF_NAME = 'dli.conf'
 
-
-BASE_IDENTITY = {
+BASE_IDENTITY_POT = {
     '@version': VERSION,
-    '@vocab': "https://platformoftrust.github.io/standards/vocabularies/.jsonld#",
+    '@vocab': "{}vocabularies/.jsonld#".format(POT_BASE),
     "pot": {
-        "@id": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#",
+        "@id": "{}ontologies/pot.jsonld#".format(POT_BASE),
         "@prefix": True
     },
     "dli": {
@@ -20,7 +22,7 @@ BASE_IDENTITY = {
     "name": "pot:name",
 }
 
-BASE_VOCABULARY = {
+BASE_VOCABULARY_POT = {
     "@context": {
         "@version": VERSION,
         "rdf": {
@@ -36,11 +38,43 @@ BASE_VOCABULARY = {
             "@prefix": True
         },
         "pot": {
-            "@id": "https://platformoftrust.github.io/standards/ontologies/pot.jsonld#",
+            "@id": "{}ontologies/pot.jsonld#".format(POT_BASE),
             "@prefix": True
         },
-        "vocab": "https://platformoftrust.github.io/standards/vocabularies/.jsonld#"
+        "vocab": "{}vocabularies/.jsonld#".format(POT_BASE)
     },
-    "@id": "https://platformoftrust.github.io/standards/vocabularies/.jsonld",
+    "@id": "{}vocabularies/.jsonld".format(POT_BASE),
     "@type": "pot:Vocabulary",
+}
+
+BASE_IDENTITY_DLI = {
+    '@version': VERSION,
+    '@vocab': "{}vocabularies/.jsonld#".format(DLI_BASE),
+    "dli": {
+        "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+        "@prefix": True
+    },
+    "data": "dli:data",
+    "name": "dli:name",
+}
+
+BASE_VOCABULARY_DLI = {
+    "@context": {
+        "@version": VERSION,
+        "rdf": {
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "@prefix": True
+        },
+        "rdfs": {
+            "@id": "http://www.w3.org/2000/01/rdf-schema#",
+            "@prefix": True
+        },
+        "dli": {
+            "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+            "@prefix": True
+        },
+        "vocab": "{}vocabularies/.jsonld#".format(DLI_BASE)
+    },
+    "@id": "{}vocabularies/.jsonld".format(DLI_BASE),
+    "@type": "dli:Vocabulary",
 }
