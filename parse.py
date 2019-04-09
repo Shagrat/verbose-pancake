@@ -53,6 +53,8 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
     while len(parents):
         tParents = []
         for parent in parents:
+            if parent.subject == parent.object:
+                continue
             total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
             tParents +=  list(map(Triplet._make, list(graph.triples((parent.object, URIRef(SUBCLASS_REF), None)))))      
         parents = tParents.copy()
@@ -113,6 +115,8 @@ def build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY
     while len(parents):
         tParents = []
         for parent in parents:
+            if parent.subject == parent.object:
+                continue
             total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
             tParents +=  list(map(Triplet._make, list(graph.triples((parent.object, URIRef(SUBCLASS_REF), None)))))      
         parents = tParents.copy()
