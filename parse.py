@@ -33,10 +33,10 @@ def get_title_and_description(subject_uriref, graph):
     return title, description
 
 
-def get_supported_types(subject_uriref, graph):
+def get_supported_types(subject_uriref, graph, context_key):
     supported_types = []
     for type_triplet in map(Triplet._make, list(graph.triples((subject_uriref, URIRef(RANGE_REF), None)))):
-        supported_types.append('pot:{}'.format(type_triplet.object.split('#')[1]))
+        supported_types.append('{}:{}'.format(context_key, type_triplet.object.split('#')[1]))
     return supported_types
 
 
@@ -86,7 +86,7 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
         if key.lower() == 'name':
             continue
         title, description = get_title_and_description(domain.subject, graph)
-        supported_types = get_supported_types(domain.subject, graph)
+        supported_types = get_supported_types(domain.subject, graph, context_key)
         supported_attribute = {
             "@type": "{}:SupportedAttribute".format(context_key),
             "dli:attribute": "{}:{}".format(context_key, key),
