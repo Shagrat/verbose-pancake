@@ -158,9 +158,12 @@ def parse(filename):
     except:
         pass
     class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/dli.jsonld#Class'.format(DLI_BASE))))
+    erros = ''
+    found_classes = []
     for class_triplet in map(Triplet._make, list(class_triples)):
         if not class_triplet.subject in classes_to_parse:
-            continue
+            continue 
+        found_classes.append(class_triplet.subject)           
         vocabulary_dict, vocabulary = build_vocabulary(graph, class_triplet, PATH_BASE=DLI_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli')
         identity_dict = build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_DLI, context_key='dli')
 
@@ -168,6 +171,11 @@ def parse(filename):
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
         with open('result/dli/vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
+        with open('error.log', 'w') as el:
+            for class_to_parse in classes_to_parse:
+                if class_to_parse not in found_classes:
+                    el.write('Class not found in DLI vocab: '+str(class_to_parse)+'\n')
+            
 if __name__ == "__main__":
     try:
         filename = sys.argv[1]
