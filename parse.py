@@ -175,7 +175,7 @@ def parse(filename):
     with open('error.log', 'a+') as el:
         for class_to_parse in classes_to_parse:
             if class_to_parse not in found_classes:
-                el.write('[{}]Class not found in DLI vocab: '.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+str(class_to_parse)+'\n')
+                el.write('[{}] Class not found in DLI vocab: '.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+str(class_to_parse)+'\n')
             
 if __name__ == "__main__":
     try:
