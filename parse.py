@@ -2,6 +2,7 @@
 import sys
 import json
 import os
+import datetime
 from collections import namedtuple
 from copy import deepcopy
 from string import Template
@@ -171,10 +172,10 @@ def parse(filename):
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
         with open('result/dli/vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
-        with open('error.log', 'w') as el:
-            for class_to_parse in classes_to_parse:
-                if class_to_parse not in found_classes:
-                    el.write('Class not found in DLI vocab: '+str(class_to_parse)+'\n')
+    with open('error.log', 'a+') as el:
+        for class_to_parse in classes_to_parse:
+            if class_to_parse not in found_classes:
+                el.write('[{}]Class not found in DLI vocab: '.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))+str(class_to_parse)+'\n')
             
 if __name__ == "__main__":
     try:
