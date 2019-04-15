@@ -102,7 +102,7 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
         if not next((attribute for attribute in supported_attributes if attribute["dli:attribute"] == supported_attribute["dli:attribute"]), None):
             supported_attributes.append(supported_attribute)
     supported_class['{}:supportedAttribute'.format(context_key)] = supported_attributes
-    vocabulary_dict['{}:supportedClass'.format(context_key)] = supported_class
+    vocabulary_dict['{}:supportedClass'.format(context_key)] = [supported_class,]
 
     return vocabulary_dict, vocabulary
 
