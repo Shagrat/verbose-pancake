@@ -43,12 +43,12 @@ def get_supported_types(subject_uriref, graph, context_key):
 
 
 
-def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=BASE_VOCABULARY_POT, context_key='pot', excludes=None):
+def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=BASE_VOCABULARY_POT, context_key='pot', excludes=None, vocabulary_prefix=''):
     if class_triplet.subject in excludes:
         return None, None, True
     vocabulary_dict = deepcopy(BASE_VOCABULARY)
     class_key = class_triplet.subject.split('#')[1]
-    vocabulary = '{}vocabularies/{}.jsonld#'.format(PATH_BASE, class_key.lower())
+    vocabulary = '{}vocabularies/{}{}.jsonld#'.format(PATH_BASE, vocabulary_prefix, underscore(class_key))
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary[:-1]
     title, description = get_title_and_description(class_triplet.subject, graph)
@@ -150,6 +150,7 @@ def parse(filename):
     except (SyntaxError, json.decoder.JSONDecodeError):
         print('Settings conf file syntax error')
         exit()
+    vocabulary_prefix = settings.get('vocabulary_prefix', '')
     for c in settings.get('dli_include', []):
         classes_to_parse.append(URIRef(c.replace('dli:', '{}ontologies/dli.jsonld#'.format(DLI_BASE))))
     for c in settings.get('pot_exclude', []):
@@ -159,14 +160,14 @@ def parse(filename):
     graph = Graph().parse(data=data, format='json-ld')
     class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/pot.jsonld#Class'.format(POT_BASE))))
     for class_triplet in map(Triplet._make, list(class_triples)):
-        vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, excludes=classes_to_exclude)
+        vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, excludes=classes_to_exclude, vocabulary_prefix=vocabulary_prefix)
         if exclude:
             continue
         identity_dict = build_identity(graph, class_triplet, vocabulary)
 
         with open('result/pot/identities/identity-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
-        with open('result/pot/vocabularies/vocabulary-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
+        with open('result/pot/vocabularies/{}{}.jsonld'.format(vocabulary_prefix, underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
     
     graph = Graph().parse('https://digitalliving.github.io/standards/ontologies/dli.jsonld', format='json-ld')
@@ -203,4 +204,3 @@ if __name__ == "__main__":
     except FileExistsError as e:
         pass
     parse(filename)
-    
