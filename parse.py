@@ -180,9 +180,9 @@ def parse(filename):
         vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, PATH_BASE=DLI_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli', excludes=[])
         identity_dict = build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_DLI, context_key='dli')
 
-        with open('result/dli/identities/identity-{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+        with open('result/dli/identities/identity-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
-        with open('result/dli/vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+        with open('result/dli/vocabularies/vocabulary-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
     with open('error.log', 'a+') as el:
         for class_to_parse in classes_to_parse:
