@@ -3,6 +3,7 @@ import sys
 import json
 import os
 import datetime
+from inflection import underscore
 from collections import namedtuple
 from copy import deepcopy
 from string import Template
@@ -10,7 +11,7 @@ from rdflib import Graph, plugin, URIRef, Literal
 from rdflib.serializer import Serializer
 from const import BASE_IDENTITY_POT, BASE_VOCABULARY_POT, VERSION, LABEL_REF, COMMENT_REF,\
         RANGE_REF, SUBCLASS_REF, POT_BASE, DLI_BASE, BASE_IDENTITY_DLI, BASE_VOCABULARY_DLI,\
-        DLI_CONF_NAME
+        CONF_NAME
 from rdflib_jsonld.parser import Parser
 Triplet = namedtuple('Triplet', 'subject, predicate, object')
 
@@ -42,7 +43,9 @@ def get_supported_types(subject_uriref, graph, context_key):
 
 
 
-def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=BASE_VOCABULARY_POT, context_key='pot'):
+def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=BASE_VOCABULARY_POT, context_key='pot', excludes=None):
+    if class_triplet.subject in excludes:
+        return None, None, True
     vocabulary_dict = deepcopy(BASE_VOCABULARY)
     class_key = class_triplet.subject.split('#')[1]
     vocabulary = '{}vocabularies/{}.jsonld#'.format(PATH_BASE, class_key.lower())
@@ -54,6 +57,8 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
     while len(parents):
         tParents = []
         for parent in parents:
+            if parent.subject in excludes:
+                return None, None, True # If some parent are in exludes, we exclude whole vocab
             if parent.subject == parent.object:
                 continue
             total_attributes += map(Triplet._make, list(graph.triples((None, URIRef('http://www.w3.org/2000/01/rdf-schema#domain'), parent.object))))
@@ -104,7 +109,7 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
     supported_class['{}:supportedAttribute'.format(context_key)] = supported_attributes
     vocabulary_dict['{}:supportedClass'.format(context_key)] = [supported_class,]
 
-    return vocabulary_dict, vocabulary
+    return vocabulary_dict, vocabulary, False
 
 
 def build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_POT, context_key='pot'):
@@ -135,37 +140,44 @@ def build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY
     return identity_dict
 
 def parse(filename):
+
+    classes_to_parse = []
+    classes_to_exclude = []
+    with open(CONF_NAME) as f:
+        data = f.read()
+    try:
+        settings = json.loads(data)
+    except (SyntaxError, json.decoder.JSONDecodeError):
+        print('Settings conf file syntax error')
+        exit()
+    for c in settings.get('dli_include', []):
+        classes_to_parse.append(URIRef(c.replace('dli:', '{}ontologies/dli.jsonld#'.format(DLI_BASE))))
+    for c in settings.get('pot_exclude', []):
+        classes_to_exclude.append(URIRef(c.replace('pot:', '{}ontologies/pot.jsonld#'.format(POT_BASE))))
     with open(filename) as f:
         data = f.read()
     graph = Graph().parse(data=data, format='json-ld')
     class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/pot.jsonld#Class'.format(POT_BASE))))
     for class_triplet in map(Triplet._make, list(class_triples)):
-        vocabulary_dict, vocabulary = build_vocabulary(graph, class_triplet)
+        vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, excludes=classes_to_exclude)
+        if exclude:
+            continue
         identity_dict = build_identity(graph, class_triplet, vocabulary)
 
-        with open('result/pot/identities/identity-{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+        with open('result/pot/identities/identity-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
-        with open('result/pot/vocabularies/{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:
+        with open('result/pot/vocabularies/vocabulary-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
     
     graph = Graph().parse('https://digitalliving.github.io/standards/ontologies/dli.jsonld', format='json-ld')
     
-    classes_to_parse = []
-    with open(DLI_CONF_NAME) as f:
-        data = f.read()
-    try:
-        for c in json.loads(data):
-            classes_to_parse.append(URIRef(c.replace('dli:', '{}ontologies/dli.jsonld#'.format(DLI_BASE))))
-    except:
-        pass
     class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/dli.jsonld#Class'.format(DLI_BASE))))
-    erros = ''
     found_classes = []
     for class_triplet in map(Triplet._make, list(class_triples)):
         if not class_triplet.subject in classes_to_parse:
             continue 
         found_classes.append(class_triplet.subject)           
-        vocabulary_dict, vocabulary = build_vocabulary(graph, class_triplet, PATH_BASE=DLI_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli')
+        vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, PATH_BASE=DLI_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli', excludes=[])
         identity_dict = build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_DLI, context_key='dli')
 
         with open('result/dli/identities/identity-{}.jsonld'.format(class_triplet.subject.split('#')[1].lower()), 'w') as f:

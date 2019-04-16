@@ -5,7 +5,7 @@ RANGE_REF = 'http://www.w3.org/2000/01/rdf-schema#range'
 SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
 POT_BASE = 'https://standards.oftrust.net/'
 DLI_BASE = 'https://digitalliving.github.io/standards/'
-DLI_CONF_NAME = 'dli.conf'
+CONF_NAME = 'settings.conf'
 
 BASE_IDENTITY_POT = {
     '@version': VERSION,
