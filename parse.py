@@ -54,10 +54,12 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
     title, description = get_title_and_description(class_triplet.subject, graph)
     total_attributes = []
     parents =  list(map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None)))))
+    if class_triplet.subject == URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#Year'):
+        print(excludes, parents)
     while len(parents):
         tParents = []
         for parent in parents:
-            if parent.subject in excludes:
+            if parent.object in excludes:
                 return None, None, True # If some parent are in exludes, we exclude whole vocab
             if parent.subject == parent.object:
                 continue
@@ -157,6 +159,7 @@ def parse(filename):
         classes_to_exclude.append(URIRef(c.replace('pot:', '{}ontologies/pot.jsonld#'.format(POT_BASE))))
     with open(filename) as f:
         data = f.read()
+
     graph = Graph().parse(data=data, format='json-ld')
     class_triples = graph.triples((None, URIRef('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'), URIRef('{}ontologies/pot.jsonld#Class'.format(POT_BASE))))
     for class_triplet in map(Triplet._make, list(class_triples)):
@@ -183,7 +186,7 @@ def parse(filename):
 
         with open('result/dli/identities/identity-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps({'@context': identity_dict}, indent=4, separators=(',', ': ')))
-        with open('result/dli/vocabularies/vocabulary-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:
+        with open('result/dli/vocabularies/{}{}.jsonld'.format(vocabulary_prefix, underscore(class_triplet.subject.split('#')[1])), 'w') as f:
             f.write(json.dumps(vocabulary_dict, indent=4, separators=(',', ': ')))
     with open('error.log', 'a+') as el:
         for class_to_parse in classes_to_parse:
