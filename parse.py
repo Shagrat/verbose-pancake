@@ -54,8 +54,6 @@ def build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=B
     title, description = get_title_and_description(class_triplet.subject, graph)
     total_attributes = []
     parents =  list(map(Triplet._make, list(graph.triples((class_triplet.subject, URIRef(SUBCLASS_REF), None)))))
-    if class_triplet.subject == URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#Year'):
-        print(excludes, parents)
     while len(parents):
         tParents = []
         for parent in parents:
@@ -181,7 +179,7 @@ def parse(filename):
         if not class_triplet.subject in classes_to_parse:
             continue 
         found_classes.append(class_triplet.subject)           
-        vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, PATH_BASE=DLI_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli', excludes=[])
+        vocabulary_dict, vocabulary, exclude = build_vocabulary(graph, class_triplet, PATH_BASE=POT_BASE, BASE_VOCABULARY=BASE_VOCABULARY_DLI, context_key='dli', excludes=[])
         identity_dict = build_identity(graph, class_triplet, vocabulary, BASE_IDENTITY=BASE_IDENTITY_DLI, context_key='dli')
 
         with open('result/dli/identities/identity-{}.jsonld'.format(underscore(class_triplet.subject.split('#')[1])), 'w') as f:

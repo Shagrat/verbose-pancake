@@ -107,3 +107,4 @@ venv.bak/
 /result
 *.jsonld
 .vscode
+settings.conf
