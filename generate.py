@@ -3,16 +3,18 @@ import sys
 import json
 from copy import deepcopy
 from rdflib import ConjunctiveGraph, RDF, RDFS
-from utils import POT, DLI, TripletTuple
+from utils import POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass
-from const import BASE_VOCABULARY_POT, POT_BASE
+from const import BASE_VOCABULARY_POT, POT_BASE, BASE_IDENTITY_POT
 
 def create_vocab_from_rdf_class(rdf_class, file_path):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
     vocabulary = '{}vocabularies/{}.jsonld#'.format(POT_BASE, rdf_class.title())
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary[:-1]
-    supported_class = []
+    supported_class = [
+        rdf_class.toPython(),
+    ]
     all_classes = rdf_class.get_dependents()
     all_classes.union(set(rdf_class.get_real_parents()))
     all_classes.add(rdf_class.get_type_object())
@@ -27,6 +29,45 @@ def create_vocab_from_rdf_class(rdf_class, file_path):
     return vocabulary_dict
 
 
+def create_identity_directory_from_rdf_class(rdf_class, file_path):
+    identity_dict = deepcopy(BASE_IDENTITY_POT)
+    vocabulary = '{}vocabularies/{}.jsonld#'.format(POT_BASE, rdf_class.title())
+    identity_dict['@vocab'] = vocabulary
+    total_attributes = set(rdf_class.get_properties())
+    children =  rdf_class.get_children()
+    identity_graph = [rdf_class.toPython()]
+    for child in children:
+        identity_graph.append(child.toPython())
+    identity_dict['@graph'] = identity_graph
+    
+
+    return identity_dict
+
+
+
+
+def create_identity_from_rdf_class(rdf_class, file_path):
+    identity_dict = deepcopy(BASE_IDENTITY_POT)
+    vocabulary = '{}vocabularies/{}.jsonld#'.format(POT_BASE, rdf_class.title())
+    identity_dict['@vocab'] = vocabulary
+    total_attributes = set(rdf_class.get_properties())
+    parents =  rdf_class.get_real_parents()
+    for p in parents:
+        total_attributes.union(p.get_properties())
+    identity_graph = [rdf_class.toPython()]
+    for domain in total_attributes:
+        key = domain.uriref.split('#')[1]
+        if key == 'name':
+            continue
+        identity_dict[key] = {
+            '@id':  uri2niceString(domain.uriref, domain.namespaces()),
+            '@nest': 'pot:data'
+        }
+        identity_graph.append(domain.toPython())
+    identity_dict['@graph'] = identity_graph
+    
+
+    return identity_dict
 
 
 def init_class_tree(graph, triplet):
@@ -69,13 +110,21 @@ def parse(filename):
     for top_class in all_classes:
         for dependent in top_class.get_dependents():
             for directory in build_directories(dependent):
-                file_dir = os.path.join('newres/vocabulary', directory)
-                file_path = os.path.join(file_dir, '{}.jsonld'.format(dependent.title()))
+                file_dir = os.path.join('newres/context', directory)
+                identiry_file_path = os.path.join(file_dir, '..', '{}.jsonld'.format(dependent.title()))
+                directory_file_path = os.path.join(file_dir, '{}.jsonld'.format(dependent.title()))
                 os.makedirs(file_dir, exist_ok=True)
-                data_to_dump = create_vocab_from_rdf_class(dependent, file_path)
-    
-                with open(file_path, 'w') as f:
+                data_to_dump = create_identity_from_rdf_class(dependent,  identiry_file_path)
+                data_to_dump = create_identity_from_rdf_class(dependent,  identiry_file_path)
+                with open(identiry_file_path, 'w') as f:
                     f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+
+                if not dependent.get_dependents():
+                    os.rmdir(file_dir)
+                else:
+                    data_to_dump = create_identity_directory_from_rdf_class(dependent,  identiry_file_path)
+                    with open(directory_file_path, 'w') as f:
+                        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
             
 if __name__ == "__main__":

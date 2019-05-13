@@ -70,6 +70,14 @@ class RDFClass:
         
         return all_dependees
 
+    def get_children(self):
+        all_dependees = set()
+        for i in self.graph.triples((None, RDFS.subClassOf, self.uriref)):
+            if i[0] == self.uriref:
+                continue
+            all_dependees.add(RDFClass(i[0], self.graph))        
+        return all_dependees
+
     def toPython(self):
         result = {
             '@id': uri2niceString(self.uriref, self.namespaces()),
