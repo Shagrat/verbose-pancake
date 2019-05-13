@@ -7,7 +7,7 @@ from inflection import underscore
 from collections import namedtuple
 from copy import deepcopy
 from string import Template
-from rdflib import Graph, plugin, URIRef, Literal
+from rdflib import Graph, plugin, URIRef, Literal, ConjunctiveGraph
 from rdflib.serializer import Serializer
 from const import BASE_IDENTITY_POT, BASE_VOCABULARY_POT, VERSION, LABEL_REF, COMMENT_REF,\
         RANGE_REF, SUBCLASS_REF, POT_BASE, DLI_BASE, BASE_IDENTITY_DLI, BASE_VOCABULARY_DLI,\
