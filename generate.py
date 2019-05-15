@@ -77,7 +77,6 @@ def create_identity_from_rdf_class(rdf_class, file_path):
             '@nest': 'pot:data'
         }
         identity_graph.append(domain.toPython())
-    identity_dict['@graph'] = identity_graph
     
 
     return {
