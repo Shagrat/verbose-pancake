@@ -47,11 +47,14 @@ def create_identity_directory_from_rdf_class(rdf_class, file_path):
         identity_graph = []
     for child in children:
         identity_graph.append(child.toPython())
-    identity_dict['@graph'] = identity_graph
+    
     del identity_dict['@vocab']
     del identity_dict['data']
     del identity_dict['name']
-    return identity_dict
+    return {
+        '@context': identity_dict,
+        '@graph': identity_graph
+    }
 
 
 
@@ -77,7 +80,10 @@ def create_identity_from_rdf_class(rdf_class, file_path):
     identity_dict['@graph'] = identity_graph
     
 
-    return identity_dict
+    return {
+        '@context': identity_dict,
+        '@graph': identity_graph
+    }
 
 
 def init_class_tree(graph, triplet):
