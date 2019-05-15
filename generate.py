@@ -31,16 +31,18 @@ def create_vocab_from_rdf_class(rdf_class, file_path):
 
 def create_identity_directory_from_rdf_class(rdf_class, file_path):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
-    vocabulary = '{}vocabularies/{}.jsonld#'.format(POT_BASE, rdf_class.title())
-    identity_dict['@vocab'] = vocabulary
-    total_attributes = set(rdf_class.get_properties())
-    children =  rdf_class.get_children()
-    identity_graph = [rdf_class.toPython()]
+    if type(rdf_class) == RDFClass:
+        children =  rdf_class.get_children()
+        identity_graph = [rdf_class.toPython()]
+    else:
+        children = rdf_class
+        identity_graph = []
     for child in children:
         identity_graph.append(child.toPython())
     identity_dict['@graph'] = identity_graph
-    
-
+    del identity_dict['@vocab']
+    del identity_dict['data']
+    del identity_dict['name']
     return identity_dict
 
 
@@ -97,7 +99,6 @@ def build_directories(rdf_class):
 def parse(filename):
     with open(filename) as f:
         data = f.read()
-
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
     graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/ontologies/pot.jsonld#', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
@@ -107,26 +108,32 @@ def parse(filename):
     all_classes = []
     for triplet in map(TripletTuple._make, all_iters):
         all_classes.append(RDFClass(triplet.subject, graph))
-    for top_class in all_classes:
-        for dependent in top_class.get_dependents():
-            for directory in build_directories(dependent):
-                file_dir = os.path.join('newres/context', directory)
-                identiry_file_path = os.path.join(file_dir, '..', '{}.jsonld'.format(dependent.title()))
-                directory_file_path = os.path.join(file_dir, '{}.jsonld'.format(dependent.title()))
-                os.makedirs(file_dir, exist_ok=True)
-                data_to_dump = create_identity_from_rdf_class(dependent,  identiry_file_path)
-                data_to_dump = create_identity_from_rdf_class(dependent,  identiry_file_path)
-                with open(identiry_file_path, 'w') as f:
+    top_classes = []
+    for current_class in all_classes:
+        if not current_class.get_real_parents():
+            top_classes.append(current_class)
+        for directory in build_directories(current_class):
+            file_dir = os.path.join('newres/context', directory)
+            identiry_file_path = os.path.join(file_dir, '..', '{}.jsonld'.format(current_class.title()))
+            directory_file_path = os.path.join(file_dir, '{}.jsonld'.format(current_class.title()))
+            os.makedirs(file_dir, exist_ok=True)
+            data_to_dump = create_identity_from_rdf_class(current_class,  identiry_file_path)
+            data_to_dump = create_identity_from_rdf_class(current_class,  identiry_file_path)
+            with open(identiry_file_path, 'w') as f:
+                f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+
+            if not current_class.get_dependents():
+                os.rmdir(file_dir)
+            else:
+                data_to_dump = create_identity_directory_from_rdf_class(current_class,  identiry_file_path)
+                with open(directory_file_path, 'w') as f:
                     f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+    context_file_path = os.path.join('newres/context', 'Context.jsonld')
+    data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
+    with open(context_file_path, 'w') as f:
+        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
-                if not dependent.get_dependents():
-                    os.rmdir(file_dir)
-                else:
-                    data_to_dump = create_identity_directory_from_rdf_class(dependent,  identiry_file_path)
-                    with open(directory_file_path, 'w') as f:
-                        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
-            
 if __name__ == "__main__":
     try:
         filename = sys.argv[1]
