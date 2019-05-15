@@ -1,7 +1,7 @@
 from rdflib import RDF, RDFS, Literal, OWL
 from utils import uri2niceString, SW
 from const import POT_BASE
-
+from string_converter import Converter
 class RDFClass:
     def __init__(self, uriref, graph):
         self.uriref = uriref
@@ -11,7 +11,7 @@ class RDFClass:
     def title(self):
         name = uri2niceString(self.uriref, self.namespaces())
         uri, name = name.split(':')
-        return name
+        return Converter().camelToDash(name)
 
     def label(self):
         title = None
