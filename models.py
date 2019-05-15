@@ -1,6 +1,6 @@
 from rdflib import RDF, RDFS, Literal, OWL
 from utils import uri2niceString, SW
-
+from const import POT_BASE
 
 class RDFClass:
     def __init__(self, uriref, graph):
@@ -44,14 +44,14 @@ class RDFClass:
         try:            
             rdf_type = RDFClass(next(self.graph.triples((self.uriref, RDF.type, None)))[2], self.graph)
         except Exception as e:
-            raise
+            return None
         return rdf_type
 
     def get_type(self):
         try:            
             rdf_type = uri2niceString(next(self.graph.triples((self.uriref, RDF.type, None)))[2], self.graph.namespaces())
         except Exception as e:
-            raise
+            return None
         return rdf_type
 
     def get_dependents(self):
@@ -78,18 +78,35 @@ class RDFClass:
             all_dependees.add(RDFClass(i[0], self.graph))        
         return all_dependees
 
+    def get_new_type_id(self):
+        #base = POT_BASE + 'standards/'
+        base = 'https://verbose.terrikon.co/' + 'context/'
+        parents_path = ''
+        if self.get_real_parents():
+            real_parent = self.get_real_parents()[0]
+            while real_parent:
+                parents_path = real_parent.title() + '/' + parents_path
+                if real_parent.get_real_parents():
+                    real_parent = real_parent.get_real_parents()[0]
+                else:
+                    real_parent = None
+        return 'pot:' + parents_path + self.title()
+
     def toPython(self):
         result = {
-            '@id': uri2niceString(self.uriref, self.namespaces()),
+            '@id': self.get_new_type_id(),
             '@type': self.get_type()
         }
 
         #Parents
-        parents = list(self.graph.triples((self.uriref, RDFS.subClassOf, None)))
-        if len(parents) > 1:
-            result['subClassOf'] = [uri2niceString(x[2], self.graph) for x in parents]
-        elif len(parents) == 1:
-            result['subClassOf'] = uri2niceString(parents[0][2], self.graph)
+        if self.get_real_parents():
+            result['subClassOf'] = self.get_real_parents()[0].get_new_type_id()
+        else:
+            parents = list(self.graph.triples((self.uriref, RDFS.subClassOf, None)))
+            if len(parents) > 1:
+                result['subClassOf'] = [x.get_new_type_id() for x in parents]
+            elif len(parents) == 1:
+                result['subClassOf'] = uri2niceString(parents[0][2], self.graph)
 
         #Labels
         labels = []
@@ -171,6 +188,31 @@ class RDFProperty:
             raise
         return rdf_type
 
+    def toVocab(self):
+        result = {
+            '@id': uri2niceString(self.uriref, self.namespaces()),
+            'dli:attribute': 'pot:SupportedAttribute',
+            "dli:title": self.label(),
+            "dli:required": False
+        }        
+
+        comments = []
+        for comment in self.graph.triples((self.uriref, RDFS.comment, None)):
+            if type(comment[2]) != Literal:
+                continue
+            comments.append({
+                '@language': comment[2].language,
+                '@value': str(comment[2]),
+            })
+        if len(comments):
+            result['dli:description'] = comments
+
+        #Doamin
+        if len(self.get_supported_range()):
+            result['dli:valueType'] = [x.get_real_id() for x in self.get_supported_range()]
+
+        return result
+    
     def toPython(self):
         result = {
             '@id': uri2niceString(self.uriref, self.namespaces())

@@ -3,7 +3,8 @@ LABEL_REF = 'http://www.w3.org/2000/01/rdf-schema#label'
 COMMENT_REF = 'http://www.w3.org/2000/01/rdf-schema#comment'
 RANGE_REF = 'http://www.w3.org/2000/01/rdf-schema#range'
 SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
-POT_BASE = 'https://standards.oftrust.net/'
+#POT_BASE = 'https://standards.oftrust.net/'
+POT_BASE = 'https://verbose.terrikon.co/'
 DLI_BASE = 'https://digitalliving.github.io/standards/'
 CONF_NAME = 'settings.conf'
 
@@ -11,7 +12,7 @@ BASE_IDENTITY_POT = {
     '@version': VERSION,
     '@vocab': "{}vocabularies/.jsonld#".format(POT_BASE),
     "pot": {
-        "@id": "{}ontologies/pot.jsonld#".format(POT_BASE),
+        "@id": "{}context/".format(POT_BASE),
         "@prefix": True
     },
     "dli": {
@@ -38,10 +39,10 @@ BASE_VOCABULARY_POT = {
             "@prefix": True
         },
         "pot": {
-            "@id": "{}ontologies/pot.jsonld#".format(POT_BASE),
+            "@id": "{}context/".format(POT_BASE),
             "@prefix": True
         },
-        "vocab": "{}vocabularies/.jsonld#".format(POT_BASE)
+        "vocab": "{}vocabularies/.jsonld".format(POT_BASE)
     },
     "@id": "{}vocabularies/.jsonld".format(POT_BASE),
     "@type": "pot:Vocabulary",
