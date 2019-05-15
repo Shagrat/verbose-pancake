@@ -64,14 +64,9 @@ def create_identity_from_rdf_class(rdf_class, file_path):
     vocabulary = '{}vocabularies/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@vocab'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
-    parents =  rdf_class.get_real_parents()
-    for p in parents:
-        total_attributes.union(p.get_properties())
     identity_graph = [rdf_class.toPython()]
     for domain in total_attributes:
         key = domain.uriref.split('#')[1]
-        if key == 'name':
-            continue
         identity_dict[key] = {
             '@id':  uri2niceString(domain.uriref, domain.namespaces()),
             '@nest': 'pot:data'

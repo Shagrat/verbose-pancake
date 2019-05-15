@@ -25,6 +25,17 @@ class RDFClass:
 
     def get_properties(self):
         attributes = []
+
+        parents =  self.get_real_parents()
+        while len(parents):
+            tParents = []
+            for parent in parents:
+                if parent.uriref == self.uriref:
+                    continue
+                for attr in self.graph.triples((None, RDFS.domain, parent.uriref)):
+                    attributes.append(RDFProperty(attr[0], self.graph))
+                tParents +=  parent.get_real_parents()
+            parents = tParents.copy()
         for attr in self.graph.triples((None, RDFS.domain, self.uriref)):
             attributes.append(RDFProperty(attr[0], self.graph))
         attributes = sorted(attributes, key=lambda x: str(x))
