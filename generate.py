@@ -9,7 +9,7 @@ from const import BASE_VOCABULARY_POT, POT_BASE, BASE_IDENTITY_POT
 
 def create_vocab_from_rdf_class(rdf_class, file_path):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
-    vocabulary = '{}vocabularies/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    vocabulary = '{}class-description/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary
     supported_class = rdf_class.toPython()
@@ -61,8 +61,9 @@ def create_identity_directory_from_rdf_class(rdf_class, file_path):
 
 def create_identity_from_rdf_class(rdf_class, file_path):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
-    vocabulary = '{}vocabularies/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['@vocab'] = vocabulary
+    vocabulary = '{}class-description/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    identity_dict['@vocab'] = '{}context/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    identity_dict['class-description'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
     total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
     identity_graph = [rdf_class.toPython()]
@@ -162,9 +163,9 @@ if __name__ == "__main__":
         exit()
     try:
         os.makedirs('result/pot/identities')
-        os.makedirs('result/pot/vocabularies')
+        os.makedirs('result/pot/class-description')
         os.makedirs('result/dli/identities')
-        os.makedirs('result/dli/vocabularies')
+        os.makedirs('result/dli/class-description')
     except FileExistsError as e:
         pass
     parse(filename)
