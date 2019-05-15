@@ -2,9 +2,9 @@ import os
 import sys
 import json
 from copy import deepcopy
-from rdflib import ConjunctiveGraph, RDF, RDFS, OWL
+from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef
 from utils import POT, DLI, TripletTuple, uri2niceString
-from models import RDFClass
+from models import RDFClass, RDFProperty
 from const import BASE_VOCABULARY_POT, POT_BASE, BASE_IDENTITY_POT
 
 def create_vocab_from_rdf_class(rdf_class, file_path):
@@ -64,6 +64,7 @@ def create_identity_from_rdf_class(rdf_class, file_path):
     vocabulary = '{}vocabularies/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@vocab'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
+    total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
     identity_graph = [rdf_class.toPython()]
     for domain in total_attributes:
         key = domain.uriref.split('#')[1]
