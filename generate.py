@@ -15,14 +15,14 @@ def create_vocab_from_rdf_class(rdf_class, file_path):
     supported_class = rdf_class.toPython()
     supported_attrs = [
             {
-            "@type": "pot:SupportedAttribute",
+            "@type": "pot:Supported-Attribute",
             "dli:attribute": "pot:name",
             "dli:title": "name",
             "dli:description": "name",
             "dli:required": True
             },
             {
-            "@type": "pot:SupportedAttribute",
+            "@type": "pot:Supported-Attribute",
             "dli:attribute": "dli:data",
             "dli:title": "data",
             "dli:description": "data",
@@ -32,8 +32,8 @@ def create_vocab_from_rdf_class(rdf_class, file_path):
     ]
     for rdf_attribute in rdf_class.get_properties():
         supported_attrs.append(rdf_attribute.toVocab())
-    supported_class['pot:supportedAttribute'] = supported_attrs
-    vocabulary_dict['pot:supportedClass'] = [supported_class,]
+    supported_class['pot:supported-Attribute'] = supported_attrs
+    vocabulary_dict['pot:supported-Class'] = [supported_class,]
     return vocabulary_dict
 
 
@@ -161,11 +161,8 @@ if __name__ == "__main__":
     except IndexError:
         print('You have to select file to parse, please use: python parse.py <filename.jsonld>')
         exit()
-    try:
-        os.makedirs('result/pot/identities')
-        os.makedirs('result/pot/class-description')
-        os.makedirs('result/dli/identities')
-        os.makedirs('result/dli/class-description')
-    except FileExistsError as e:
-        pass
+    os.makedirs('result/pot/identities', exist_ok=True)
+    os.makedirs('result/pot/vocabulary', exist_ok=True)
+    os.makedirs('result/dli/identities', exist_ok=True)
+    os.makedirs('result/dli/vocabulary', exist_ok=True)
     parse(filename)
