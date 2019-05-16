@@ -67,6 +67,8 @@ def create_identity_from_rdf_class(rdf_class, file_path):
     identity_graph = [rdf_class.toPython()]
     for domain in total_attributes:
         key = domain.uriref.split('#')[1]
+        if key == 'name':
+            continue
         identity_dict[key] = {
             '@id':  uri2niceString(domain.uriref, domain.namespaces()),
             '@nest': 'pot:data'

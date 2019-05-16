@@ -2,6 +2,7 @@ from rdflib import RDF, RDFS, Literal, OWL
 from utils import uri2niceString, SW
 from const import POT_BASE
 from string_converter import Converter
+
 class RDFClass:
     def __init__(self, uriref, graph):
         self.uriref = uriref
@@ -26,7 +27,7 @@ class RDFClass:
     def get_properties(self):
         attributes = []
 
-        parents =  self.get_real_parents()
+        parents =  [RDFClass(x[2], self.graph) for x in self.graph.triples((self.uriref, RDFS.subClassOf, None))]
         while len(parents):
             tParents = []
             for parent in parents:
@@ -34,7 +35,7 @@ class RDFClass:
                     continue
                 for attr in self.graph.triples((None, RDFS.domain, parent.uriref)):
                     attributes.append(RDFProperty(attr[0], self.graph))
-                tParents +=  parent.get_real_parents()
+                tParents +=  [RDFClass(x[2], self.graph) for x in self.graph.triples((parent.uriref, RDFS.subClassOf, None))]
             parents = tParents.copy()
         for attr in self.graph.triples((None, RDFS.domain, self.uriref)):
             attributes.append(RDFProperty(attr[0], self.graph))
@@ -218,8 +219,9 @@ class RDFProperty:
             result['dli:description'] = comments
 
         #Doamin
+        
         if len(self.get_supported_range()):
-            result['dli:valueType'] = [x.get_real_id() for x in self.get_supported_range()]
+            result['dli:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
 
         return result
     
