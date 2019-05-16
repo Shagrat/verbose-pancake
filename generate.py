@@ -74,7 +74,13 @@ def create_identity_from_rdf_class(rdf_class, file_path):
             '@nest': 'pot:data'
         }
         identity_graph.append(domain.toPython())
-
+    for dependent in rdf_class.get_dependents():
+        identity_graph.append({
+            '@id': dependent.get_new_type_id(),
+            'rdfs:subClassOf':{
+                '@id': rdf_class.get_new_type_id()
+            }
+        })
     return {
         '@context': identity_dict,
         '@graph': identity_graph
@@ -134,11 +140,6 @@ def parse(filename):
 
             if not current_class.get_dependents():
                 os.rmdir(identity_dir)
-            else:
-                data_to_dump = create_identity_directory_from_rdf_class(current_class,  identiry_file_path)
-                with open(directory_file_path, 'w') as f:
-                    f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
-            
             
             vocabulary_dir = os.path.join('newres/vocabulary', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
