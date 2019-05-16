@@ -90,8 +90,7 @@ class RDFClass:
         return all_dependees
 
     def get_new_type_id(self):
-        #base = POT_BASE + 'standards/'
-        base = 'https://verbose.terrikon.co/' + 'context/'
+        base = POT_BASE + 'context/'
         parents_path = ''
         if self.get_real_parents():
             real_parent = self.get_real_parents()[0]

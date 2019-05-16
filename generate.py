@@ -57,8 +57,6 @@ def create_identity_directory_from_rdf_class(rdf_class, file_path):
     }
 
 
-
-
 def create_identity_from_rdf_class(rdf_class, file_path):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
     vocabulary = '{}class-description/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
@@ -74,7 +72,6 @@ def create_identity_from_rdf_class(rdf_class, file_path):
             '@nest': 'pot:data'
         }
         identity_graph.append(domain.toPython())
-    
 
     return {
         '@context': identity_dict,
@@ -106,11 +103,12 @@ def build_directories(rdf_class):
         directories = [rdf_class.title(), ]
     return directories
 
+
 def parse(filename):
     with open(filename) as f:
         data = f.read()
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
-    graph.namespace_manager.bind('pot', 'https://verbose.terrikon.co/context/', replace=True)
+    graph.namespace_manager.bind('pot', POT_BASE + 'context/', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))
