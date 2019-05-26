@@ -75,16 +75,14 @@ def create_vocabulary_from_rdf_class(rdf_class):
 
 def create_identity_directory_from_rdf_class(top_classes, file_path):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
-    identity_graph = []
     for child in top_classes:
-        identity_graph.append(child.toPython())
+        identity_dict[child.title()] = child.toPython()
     
     del identity_dict['@vocab']
     del identity_dict['data']
     del identity_dict['name']
     return {
         '@context': identity_dict,
-        '@graph': identity_graph
     }
 
 
