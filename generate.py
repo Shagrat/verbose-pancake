@@ -40,7 +40,6 @@ def create_identity_from_rdf_class(rdf_class):
     identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@classDefinitions'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
-    total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
     return {
         '@context': identity_dict
     }
@@ -49,7 +48,6 @@ def create_identity_from_rdf_class(rdf_class):
 def create_vocabulary_from_rdf_class(rdf_class):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
     total_attributes = set(rdf_class.get_properties())
-    total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
     for domain in total_attributes:
         vocabulary_dict[domain.title()] = domain.toPython(noId=True)
     for dependent in rdf_class.get_dependents():
@@ -106,6 +104,7 @@ def parse(filename):
         data = f.read()
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
     graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
+    graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Classes/', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))
@@ -115,11 +114,13 @@ def parse(filename):
         all_classes.append(RDFClass(triplet.subject, graph))
     top_classes = []
     for current_class in all_classes:
+        print(current_class)
         if not current_class.get_real_parents():
             top_classes.append(current_class)
         for directory in build_directories(current_class):
             identity_dir = os.path.join('newres/Classes', directory)
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
+            print(identity_dir)
             os.makedirs(identity_dir, exist_ok=True)
             data_to_dump = create_identity_from_rdf_class(current_class)
             with open(identiry_file_path, 'w') as f:
