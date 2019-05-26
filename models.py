@@ -100,7 +100,9 @@ class RDFClass:
                     real_parent = real_parent.get_real_parents()[0]
                 else:
                     real_parent = None
-        return 'pot:' + parents_path + self.title()
+        name = uri2niceString(self.uriref, self.namespaces())
+        uri, name = name.split(':')
+        return uri + ':' + parents_path + self.title()
 
     def toPython(self):
         result = {
