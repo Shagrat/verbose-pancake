@@ -9,31 +9,30 @@ from const import BASE_VOCABULARY_POT, POT_BASE, BASE_IDENTITY_POT
 
 def create_vocab_from_rdf_class(rdf_class, file_path):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
-    vocabulary = '{}class-description/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary
     supported_class = rdf_class.toPython()
     supported_attrs = [
             {
-            "@type": "pot:Supported-Attribute",
+            "@type": "pot:supportedAttribute",
             "dli:attribute": "pot:name",
             "dli:title": "name",
             "dli:description": "name",
             "dli:required": True
             },
             {
-            "@type": "pot:Supported-Attribute",
+            "@type": "pot:supportedAttribute",
             "dli:attribute": "dli:data",
             "dli:title": "data",
             "dli:description": "data",
             "dli:required": True,
-            "dli:valueType": "xsd:object"
             },
     ]
     for rdf_attribute in rdf_class.get_properties():
         supported_attrs.append(rdf_attribute.toVocab())
-    supported_class['pot:supported-Attribute'] = supported_attrs
-    vocabulary_dict['pot:supported-Class'] = [supported_class,]
+    supported_class['pot:supportedAttribute'] = supported_attrs
+    vocabulary_dict['pot:supportedClass'] = [supported_class,]
     return vocabulary_dict
 
 
@@ -46,7 +45,12 @@ def create_identity_directory_from_rdf_class(rdf_class, file_path):
         children = rdf_class
         identity_graph = []
     for child in children:
-        identity_graph.append(child.toPython())
+        identity_graph.append({
+            '@id': child.get_new_type_id(),
+            'rdfs:subClassOf':{
+                '@id': child.toPython().get('subClassOf')
+            }
+        })
     
     del identity_dict['@vocab']
     del identity_dict['data']
@@ -59,9 +63,9 @@ def create_identity_directory_from_rdf_class(rdf_class, file_path):
 
 def create_identity_from_rdf_class(rdf_class, file_path):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
-    vocabulary = '{}class-description/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@vocab'] = '{}context/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['class-description'] = vocabulary
+    identity_dict['ClassDefinitions'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
     total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
     identity_graph = [rdf_class.toPython()]
@@ -71,7 +75,7 @@ def create_identity_from_rdf_class(rdf_class, file_path):
             continue
         identity_dict[key] = {
             '@id':  uri2niceString(domain.uriref, domain.namespaces()),
-            '@nest': 'pot:data'
+            '@nest': 'data'
         }
         identity_graph.append(domain.toPython())
     for dependent in rdf_class.get_dependents():
@@ -129,7 +133,7 @@ def parse(filename):
         if not current_class.get_real_parents():
             top_classes.append(current_class)
         for directory in build_directories(current_class):
-            identity_dir = os.path.join('newres/context', directory)
+            identity_dir = os.path.join('newres/Classes', directory)
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
             directory_file_path = os.path.join(identity_dir, '{}.jsonld'.format(current_class.title()))
             os.makedirs(identity_dir, exist_ok=True)
@@ -141,7 +145,7 @@ def parse(filename):
             if not current_class.get_dependents():
                 os.rmdir(identity_dir)
             
-            vocabulary_dir = os.path.join('newres/vocabulary', directory)
+            vocabulary_dir = os.path.join('newres/ClassDefinitions', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(vocabulary_dir, exist_ok=True)
             data_to_dump = create_vocab_from_rdf_class(current_class,  vocabulary_file_path)
@@ -150,7 +154,7 @@ def parse(filename):
             if not current_class.get_dependents():
                 os.rmdir(vocabulary_dir)
 
-    context_file_path = os.path.join('newres/context', 'context.jsonld')
+    context_file_path = os.path.join('newres/Classes', 'context.jsonld')
     data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
     with open(context_file_path, 'w') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))

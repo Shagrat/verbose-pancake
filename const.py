@@ -4,7 +4,7 @@ COMMENT_REF = 'http://www.w3.org/2000/01/rdf-schema#comment'
 RANGE_REF = 'http://www.w3.org/2000/01/rdf-schema#range'
 SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
 #POT_BASE = 'https://standards.oftrust.net/'
-POT_BASE = 'http://verbose-dash.terrikon.co/v1/'
+POT_BASE = 'http://verbose.terrikon.co/v1/'
 DLI_BASE = 'https://digitalliving.github.io/standards/'
 CONF_NAME = 'settings.conf'
 
