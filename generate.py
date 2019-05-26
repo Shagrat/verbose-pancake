@@ -7,6 +7,7 @@ from utils import POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass, RDFProperty
 from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT
 
+
 def create_deffinition_from_rdf_class(rdf_class):
     vocabulary_dict = deepcopy(BASE_DEFFINITION_POT)
     vocabulary = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
@@ -82,17 +83,6 @@ def create_identity_directory_from_rdf_class(top_classes, file_path):
     }
 
 
-def init_class_tree(graph, triplet):
-    found = False
-    for i in map(TripletTuple._make, list(graph.triples((None, RDFS.subClassOf, triplet.subject)))):
-        found = True
-        if triplet.subject == i.subject:
-            continue
-        init_class_tree(graph, i)
-    
-    return None, True
-
-
 def build_directories(rdf_class):
     parents = rdf_class.get_real_parents()
     if len(parents):
@@ -122,13 +112,11 @@ def parse(filename):
         all_classes.append(RDFClass(triplet.subject, graph))
     top_classes = []
     for current_class in all_classes:
-        print(current_class)
         if not current_class.get_real_parents():
             top_classes.append(current_class)
         for directory in build_directories(current_class):
             identity_dir = os.path.join('newres/Classes', directory)
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
-            print(identity_dir)
             os.makedirs(identity_dir, exist_ok=True)
             data_to_dump = create_identity_from_rdf_class(current_class)
             with open(identiry_file_path, 'w') as f:
