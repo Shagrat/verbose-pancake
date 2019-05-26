@@ -152,6 +152,9 @@ def parse(filename):
     data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
     with open(context_file_path, 'w') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+    context_file_path = os.path.join('newres', 'context.jsonld')
+    with open(context_file_path, 'w') as f:
+        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
 
 if __name__ == "__main__":
