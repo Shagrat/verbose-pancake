@@ -148,14 +148,19 @@ def parse(filename):
             if not current_class.get_dependents():
                 os.rmdir(vocabulary_dir)
 
-    context_file_path = os.path.join('newres/Classes', 'context.jsonld')
+    context_file_path = os.path.join('newres/Classes', 'classes.jsonld')
     data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
     with open(context_file_path, 'w') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
-    context_file_path = os.path.join('newres', 'context.jsonld')
+    context_file_path = os.path.join('newres/Classes', 'classes.jsonld')
     with open(context_file_path, 'w') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
-
+    context_file_path = os.path.join('newres', 'classes.jsonld')
+    with open(context_file_path, 'w') as f:
+        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+    context_file_path = os.path.join('newres', 'classes.jsonld')
+    with open(context_file_path, 'w') as f:
+        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
 if __name__ == "__main__":
     try:
