@@ -40,6 +40,14 @@ def create_identity_from_rdf_class(rdf_class):
     identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@classDefinitions'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
+    for domain in total_attributes:
+        key = domain.title()
+        if key == 'name':
+            continue
+        identity_dict[key] = {
+            '@id':  uri2niceString(domain.uriref, domain.namespaces()),
+            '@nest': 'data'
+        }
     return {
         '@context': identity_dict
     }
