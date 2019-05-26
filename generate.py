@@ -9,8 +9,8 @@ from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABU
 
 def create_deffinition_from_rdf_class(rdf_class):
     vocabulary_dict = deepcopy(BASE_DEFFINITION_POT)
-    vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    vocabulary_dict['@context']['vocab'] = vocabulary
+    vocabulary = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    vocabulary_dict['@context']['@vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary
     supported_class = rdf_class.toPython()
     supported_attrs = {
