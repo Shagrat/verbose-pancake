@@ -36,21 +36,11 @@ def create_vocab_from_rdf_class(rdf_class, file_path):
     return vocabulary_dict
 
 
-def create_identity_directory_from_rdf_class(rdf_class, file_path):
+def create_identity_directory_from_rdf_class(top_classes, file_path):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
-    if type(rdf_class) == RDFClass:
-        children =  rdf_class.get_children()
-        identity_graph = [rdf_class.toPython()]
-    else:
-        children = rdf_class
-        identity_graph = []
-    for child in children:
-        identity_graph.append({
-            '@id': child.get_new_type_id(),
-            'rdfs:subClassOf':{
-                '@id': child.toPython().get('subClassOf')
-            }
-        })
+    identity_graph = []
+    for child in top_classes:
+        identity_graph.append(child.toPython())
     
     del identity_dict['@vocab']
     del identity_dict['data']
@@ -137,7 +127,6 @@ def parse(filename):
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
             directory_file_path = os.path.join(identity_dir, '{}.jsonld'.format(current_class.title()))
             os.makedirs(identity_dir, exist_ok=True)
-            data_to_dump = create_identity_from_rdf_class(current_class,  identiry_file_path)
             data_to_dump = create_identity_from_rdf_class(current_class,  identiry_file_path)
             with open(identiry_file_path, 'w') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
