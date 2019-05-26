@@ -52,7 +52,7 @@ BASE_DEFFINITION_POT = {
 BASE_VOCABULARY_POT = {
     '@version': VERSION,
     "pot": {
-        "@id": "{}Classes/".format(POT_BASE),
+        "@id": "{}Vocabulary/".format(POT_BASE),
         "@prefix": True
     },
     "dli": {
