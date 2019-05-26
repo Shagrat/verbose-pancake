@@ -39,7 +39,7 @@ def create_identity_from_rdf_class(rdf_class):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
     vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['@classDefinitions'] = vocabulary
+    identity_dict['@classDefinition'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
     for domain in total_attributes:
         key = domain.title()
