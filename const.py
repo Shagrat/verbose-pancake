@@ -12,7 +12,7 @@ BASE_IDENTITY_POT = {
     '@version': VERSION,
     '@vocab': "{}vocabularies/.jsonld#".format(POT_BASE),
     "pot": {
-        "@id": "{}Classes/".format(POT_BASE),
+        "@id": "{}Vocabulary/".format(POT_BASE),
         "@prefix": True
     },
     "dli": {
@@ -39,7 +39,7 @@ BASE_DEFFINITION_POT = {
             "@prefix": True
         },
         "pot": {
-            "@id": "{}Classes/".format(POT_BASE),
+            "@id": "{}Vocabulary/".format(POT_BASE),
             "@prefix": True
         },
         "vocab": "{}vocabularies/.jsonld".format(POT_BASE)
