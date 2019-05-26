@@ -5,34 +5,59 @@ from copy import deepcopy
 from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef
 from utils import POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass, RDFProperty
-from const import BASE_VOCABULARY_POT, POT_BASE, BASE_IDENTITY_POT
+from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT
 
-def create_vocab_from_rdf_class(rdf_class, file_path):
-    vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
+def create_deffinition_from_rdf_class(rdf_class):
+    vocabulary_dict = deepcopy(BASE_DEFFINITION_POT)
     vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     vocabulary_dict['@context']['vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary
     supported_class = rdf_class.toPython()
-    supported_attrs = [
-            {
-            "@type": "pot:supportedAttribute",
-            "dli:attribute": "pot:name",
+    supported_attrs = {
+        'name': {
+            "@type": "pot:SupportedAttribute",
             "dli:title": "name",
             "dli:description": "name",
             "dli:required": True
-            },
-            {
-            "@type": "pot:supportedAttribute",
-            "dli:attribute": "dli:data",
+        },
+        'data':{
+            "@type": "pot:SupportedAttribute",
             "dli:title": "data",
             "dli:description": "data",
             "dli:required": True,
-            },
-    ]
+        }
+    }
     for rdf_attribute in rdf_class.get_properties():
-        supported_attrs.append(rdf_attribute.toVocab())
+        supported_attrs[rdf_attribute.title()]= rdf_attribute.toVocab(noId=True)
     supported_class['pot:supportedAttribute'] = supported_attrs
-    vocabulary_dict['pot:supportedClass'] = [supported_class,]
+    vocabulary_dict['pot:supportedClass'] = supported_class
+    return vocabulary_dict
+
+
+def create_identity_from_rdf_class(rdf_class):
+    identity_dict = deepcopy(BASE_IDENTITY_POT)
+    vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    identity_dict['@vocab'] = '{}Classes/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    identity_dict['ClassDefinitions'] = vocabulary
+    total_attributes = set(rdf_class.get_properties())
+    total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
+    return {
+        '@context': identity_dict
+    }
+
+
+def create_vocabulary_from_rdf_class(rdf_class):
+    vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
+    total_attributes = set(rdf_class.get_properties())
+    total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
+    for domain in total_attributes:
+        vocabulary_dict[domain.title()] = domain.toPython(noId=True)
+    for dependent in rdf_class.get_dependents():
+        vocabulary_dict[dependent.title()] = {
+            'rdfs:subClassOf':{
+                '@id': rdf_class.get_new_type_id()
+            }
+        }
     return vocabulary_dict
 
 
@@ -45,36 +70,6 @@ def create_identity_directory_from_rdf_class(top_classes, file_path):
     del identity_dict['@vocab']
     del identity_dict['data']
     del identity_dict['name']
-    return {
-        '@context': identity_dict,
-        '@graph': identity_graph
-    }
-
-
-def create_identity_from_rdf_class(rdf_class, file_path):
-    identity_dict = deepcopy(BASE_IDENTITY_POT)
-    vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['@vocab'] = '{}context/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['ClassDefinitions'] = vocabulary
-    total_attributes = set(rdf_class.get_properties())
-    total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
-    identity_graph = [rdf_class.toPython()]
-    for domain in total_attributes:
-        key = domain.uriref.split('#')[1]
-        if key == 'name':
-            continue
-        identity_dict[key] = {
-            '@id':  uri2niceString(domain.uriref, domain.namespaces()),
-            '@nest': 'data'
-        }
-        identity_graph.append(domain.toPython())
-    for dependent in rdf_class.get_dependents():
-        identity_graph.append({
-            '@id': dependent.get_new_type_id(),
-            'rdfs:subClassOf':{
-                '@id': rdf_class.get_new_type_id()
-            }
-        })
     return {
         '@context': identity_dict,
         '@graph': identity_graph
@@ -110,7 +105,7 @@ def parse(filename):
     with open(filename) as f:
         data = f.read()
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
-    graph.namespace_manager.bind('pot', POT_BASE + 'context/', replace=True)
+    graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))
@@ -125,21 +120,31 @@ def parse(filename):
         for directory in build_directories(current_class):
             identity_dir = os.path.join('newres/Classes', directory)
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
-            directory_file_path = os.path.join(identity_dir, '{}.jsonld'.format(current_class.title()))
             os.makedirs(identity_dir, exist_ok=True)
-            data_to_dump = create_identity_from_rdf_class(current_class,  identiry_file_path)
+            data_to_dump = create_identity_from_rdf_class(current_class)
             with open(identiry_file_path, 'w') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
             if not current_class.get_dependents():
                 os.rmdir(identity_dir)
             
-            vocabulary_dir = os.path.join('newres/ClassDefinitions', directory)
+            deffinition_dir = os.path.join('newres/ClassDefinitions', directory)
+            deffinition_file_path = os.path.join(deffinition_dir, '..', '{}.jsonld'.format(current_class.title()))
+            os.makedirs(deffinition_dir, exist_ok=True)
+            data_to_dump = create_deffinition_from_rdf_class(current_class)
+            with open(deffinition_file_path, 'w') as f:
+                f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+            
+            if not current_class.get_dependents():
+                os.rmdir(deffinition_dir)
+
+            vocabulary_dir = os.path.join('newres/Vocabulary', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(vocabulary_dir, exist_ok=True)
-            data_to_dump = create_vocab_from_rdf_class(current_class,  vocabulary_file_path)
+            data_to_dump = create_vocabulary_from_rdf_class(current_class)
             with open(vocabulary_file_path, 'w') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
+            
             if not current_class.get_dependents():
                 os.rmdir(vocabulary_dir)
 
@@ -155,8 +160,4 @@ if __name__ == "__main__":
     except IndexError:
         print('You have to select file to parse, please use: python parse.py <filename.jsonld>')
         exit()
-    os.makedirs('result/pot/identities', exist_ok=True)
-    os.makedirs('result/pot/vocabulary', exist_ok=True)
-    os.makedirs('result/dli/identities', exist_ok=True)
-    os.makedirs('result/dli/vocabulary', exist_ok=True)
     parse(filename)

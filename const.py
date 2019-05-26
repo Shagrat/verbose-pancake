@@ -12,7 +12,7 @@ BASE_IDENTITY_POT = {
     '@version': VERSION,
     '@vocab': "{}vocabularies/.jsonld#".format(POT_BASE),
     "pot": {
-        "@id": "{}context/".format(POT_BASE),
+        "@id": "{}Classes/".format(POT_BASE),
         "@prefix": True
     },
     "dli": {
@@ -23,7 +23,7 @@ BASE_IDENTITY_POT = {
     "name": "pot:name",
 }
 
-BASE_VOCABULARY_POT = {
+BASE_DEFFINITION_POT = {
     "@context": {
         "@version": VERSION,
         "rdf": {
@@ -39,7 +39,7 @@ BASE_VOCABULARY_POT = {
             "@prefix": True
         },
         "pot": {
-            "@id": "{}context/".format(POT_BASE),
+            "@id": "{}Classes/".format(POT_BASE),
             "@prefix": True
         },
         "vocab": "{}vocabularies/.jsonld".format(POT_BASE)
@@ -47,6 +47,20 @@ BASE_VOCABULARY_POT = {
     "@id": "{}vocabularies/.jsonld".format(POT_BASE),
     "@type": "pot:Vocabulary",
 }
+
+
+BASE_VOCABULARY_POT = {
+    '@version': VERSION,
+    "pot": {
+        "@id": "{}Classes/".format(POT_BASE),
+        "@prefix": True
+    },
+    "dli": {
+        "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+        "@prefix": True
+    }
+}
+
 
 BASE_IDENTITY_DLI = {
     '@version': VERSION,

@@ -169,6 +169,11 @@ class RDFProperty:
         self.namespaces = graph.namespaces
         self.graph = graph
 
+    def title(self):
+        name = uri2niceString(self.uriref, self.namespaces())
+        uri, name = name.split(':')
+        return name
+
     def label(self):
         title = None
         for title_triplet in self.graph.triples((self.uriref, RDFS.label, None)):
@@ -198,13 +203,17 @@ class RDFProperty:
             raise
         return rdf_type
 
-    def toVocab(self):
+    def toVocab(self, noId=False):
         result = {
             '@id': uri2niceString(self.uriref, self.namespaces()),
-            'dli:attribute': 'pot:SupportedAttribute',
+            '@type': 'pot:SupportedAttribute',
             "dli:title": self.label(),
             "dli:required": False
         }        
+
+        if noId:
+            del result['@id']
+
 
         comments = []
         for comment in self.graph.triples((self.uriref, RDFS.comment, None)):
@@ -224,10 +233,13 @@ class RDFProperty:
 
         return result
     
-    def toPython(self):
+    def toPython(self, noId=False):
         result = {
             '@id': uri2niceString(self.uriref, self.namespaces())
         }
+
+        if noId:
+            del result['@id']
 
         # Determine type
         result['@type'] = self.get_type()
