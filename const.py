@@ -45,7 +45,6 @@ BASE_DEFFINITION_POT = {
         "vocab": "{}vocabularies/.jsonld".format(POT_BASE)
     },
     "@id": "{}vocabularies/.jsonld".format(POT_BASE),
-    "@type": "pot:Vocabulary",
 }
 
 

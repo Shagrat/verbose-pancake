@@ -16,12 +16,14 @@ def create_deffinition_from_rdf_class(rdf_class):
     supported_class = rdf_class.toPython()
     supported_attrs = {
         'name': {
+            "@id": 'pot:name',
             "@type": "pot:SupportedAttribute",
             "dli:title": "name",
             "dli:description": "name",
             "dli:required": True
         },
         'data':{
+            "@id": 'dli:data',
             "@type": "pot:SupportedAttribute",
             "dli:title": "data",
             "dli:description": "data",
@@ -29,7 +31,7 @@ def create_deffinition_from_rdf_class(rdf_class):
         }
     }
     for rdf_attribute in rdf_class.get_properties():
-        supported_attrs[rdf_attribute.title()]= rdf_attribute.toVocab(noId=True)
+        supported_attrs[rdf_attribute.title()]= rdf_attribute.toVocab()
     supported_class['pot:supportedAttribute'] = supported_attrs
     vocabulary_dict['pot:supportedClass'] = supported_class
     return vocabulary_dict
@@ -58,7 +60,7 @@ def create_vocabulary_from_rdf_class(rdf_class):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
     total_attributes = set(rdf_class.get_properties())
     for domain in total_attributes:
-        vocabulary_dict[domain.title()] = domain.toPython(noId=True)
+        vocabulary_dict[domain.title()] = domain.toPython()
     for dependent in rdf_class.get_dependents():
         vocabulary_dict[dependent.title()] = {
             'rdfs:subClassOf':{
