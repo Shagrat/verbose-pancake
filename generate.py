@@ -37,8 +37,8 @@ def create_deffinition_from_rdf_class(rdf_class):
 def create_identity_from_rdf_class(rdf_class):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
     vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['@vocab'] = '{}Classes/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
-    identity_dict['ClassDefinitions'] = vocabulary
+    identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
+    identity_dict['@classDefinitions'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
     total_attributes.add(RDFProperty(URIRef('https://standards.oftrust.net/ontologies/pot.jsonld#name'), rdf_class.graph))
     return {
