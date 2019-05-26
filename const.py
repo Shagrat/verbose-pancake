@@ -11,6 +11,7 @@ CONF_NAME = 'settings.conf'
 BASE_IDENTITY_POT = {
     '@version': VERSION,
     '@vocab': "{}vocabularies/.jsonld#".format(POT_BASE),
+    '@classDefinition':'',
     "pot": {
         "@id": "{}Vocabulary/".format(POT_BASE),
         "@prefix": True
@@ -41,8 +42,7 @@ BASE_DEFFINITION_POT = {
         "pot": {
             "@id": "{}Vocabulary/".format(POT_BASE),
             "@prefix": True
-        },
-        "vocab": "{}vocabularies/.jsonld".format(POT_BASE)
+        }
     },
     "@id": "{}vocabularies/.jsonld".format(POT_BASE),
 }

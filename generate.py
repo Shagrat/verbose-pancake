@@ -5,7 +5,7 @@ from copy import deepcopy
 from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef
 from utils import POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass, RDFProperty
-from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT
+from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT, CONF_NAME
 
 
 def create_deffinition_from_rdf_class(rdf_class):
@@ -37,7 +37,7 @@ def create_deffinition_from_rdf_class(rdf_class):
     return vocabulary_dict
 
 
-def create_identity_from_rdf_class(rdf_class):
+def create_identity_from_rdf_class(rdf_class, flat_definition):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
     vocabulary = '{}ClassDefinitions/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
     identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_BASE, rdf_class.get_new_type_id()[4:])
@@ -47,10 +47,13 @@ def create_identity_from_rdf_class(rdf_class):
         key = domain.title()
         if key == 'name':
             continue
-        identity_dict[key] = {
-            '@id':  uri2niceString(domain.uriref, domain.namespaces()),
-            '@nest': 'data'
-        }
+        if uri2niceString(rdf_class.uriref, rdf_class.namespaces()) not in flat_definition:
+            identity_dict[key] = {
+                '@id':  uri2niceString(domain.uriref, domain.namespaces()),
+                '@nest': 'data'
+            }
+        else:
+            identity_dict[key] = uri2niceString(domain.uriref, domain.namespaces())
     return {
         '@context': identity_dict
     }
@@ -100,6 +103,14 @@ def build_directories(rdf_class):
 
 
 def parse(filename):
+    with open(CONF_NAME) as f:
+        data = f.read()
+    try:
+        settings = json.loads(data)
+    except (SyntaxError, json.decoder.JSONDecodeError):
+        print('Settings conf file syntax error')
+        exit()
+
     with open(filename) as f:
         data = f.read()
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
@@ -120,7 +131,7 @@ def parse(filename):
             identity_dir = os.path.join('newres/Classes', directory)
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(identity_dir, exist_ok=True)
-            data_to_dump = create_identity_from_rdf_class(current_class)
+            data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []))
             with open(identiry_file_path, 'w') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': ')))
 
