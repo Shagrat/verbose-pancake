@@ -112,8 +112,8 @@ def parse(filename):
     with open(filename) as f:
         data = f.read()
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
-    graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
-    graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Classes/', replace=True)
+    graph.namespace_manager.bind('pot', POT_BASE + 'Context/', replace=True)
+    graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Context/', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))
@@ -126,7 +126,7 @@ def parse(filename):
         if not current_class.get_real_parents():
             top_classes.append(current_class)
         for directory in build_directories(current_class):
-            identity_dir = os.path.join('newres/Classes', directory)
+            identity_dir = os.path.join('newres/Context', directory)
             identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(identity_dir, exist_ok=True)
             data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []))
