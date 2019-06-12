@@ -1,7 +1,7 @@
 from collections import namedtuple
 import rdflib
 
-POT = rdflib.Namespace('https://standards.oftrust.net/Context/')
+POT = rdflib.Namespace('https://standards.oftrust.net/Classes/')
 DLI = rdflib.Namespace('https://digitalliving.github.io/standards/ontologies/dli.jsonld#')
 SW = rdflib.Namespace('http://www.w3.org/2003/06/sw-vocab-status/ns#')
 
@@ -16,7 +16,7 @@ NAMESPACES_DEFAULT = [
     ("skos", rdflib.URIRef("http://www.w3.org/2004/02/skos/core#")),
     ("owl", rdflib.URIRef("http://www.w3.org/2002/07/owl#")),
     ("dli", rdflib.URIRef("https://digitalliving.github.io/standards/ontologies/dli.jsonld#")),
-    ("pot", rdflib.URIRef("https://standards.oftrust.net/Context/")),
+    ("pot", rdflib.URIRef("https://standards.oftrust.net/Classes/")),
 ]
 
 

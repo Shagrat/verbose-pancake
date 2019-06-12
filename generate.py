@@ -112,8 +112,8 @@ def parse(filename):
     with open(filename) as f:
         data = f.read()
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
-    graph.namespace_manager.bind('pot', POT_BASE + 'Context/', replace=True)
-    graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Context/', replace=True)
+    graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
+    graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Classes/', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))
