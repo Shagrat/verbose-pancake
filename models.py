@@ -267,7 +267,20 @@ class RDFProperty:
             if comment_domain not in domains:
                 continue
             if comment_domain_selected and str(comment_domain_selected) != comment_domain:
-                continue
+                not_found = True
+                parents =  [RDFClass(x[2], self.graph) for x in self.graph.triples((comment_domain_selected.uriref, RDFS.subClassOf, None))]
+                while len(parents):
+                    tParents = []
+                    for parent in parents:
+                        if parent.uriref == self.uriref:
+                            continue
+                        if str(parent) == comment_domain:
+                            not_found = False
+                            break
+                        tParents +=  [RDFClass(x[2], self.graph) for x in self.graph.triples((parent.uriref, RDFS.subClassOf, None))]
+                    parents = tParents.copy()
+                if not_found:
+                    continue
             comments.append({
                 '@language': comment_text[2].language,
                 '@value': str(comment_text[2]),
