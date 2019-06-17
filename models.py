@@ -1,4 +1,4 @@
-from rdflib import RDF, RDFS, Literal, OWL
+from rdflib import RDF, RDFS, Literal, OWL, XSD
 from utils import uri2niceString, SW
 from const import POT_BASE
 
@@ -192,6 +192,14 @@ class RDFProperty:
             supported.append(RDFClass(item[2], self.graph))
         return supported
 
+    def get_restrictions(self):
+        restriction = {}
+        for item in self.graph.triples((self.uriref, XSD.restriction, None)):
+            for bnode in self.graph.triples((item[2], None, None)):
+                restriction[uri2niceString(bnode[1])] = bnode[2]
+            #supported.append(RDFClass(item[2], self.graph))
+        return restriction
+
     def get_domains(self):
         domains = []
         for domain in self.graph.triples((self.uriref, RDFS.domain, None)):
@@ -229,9 +237,11 @@ class RDFProperty:
             result['dli:description'] = comments
 
         #Doamin
-        
         if len(self.get_supported_range()):
             result['dli:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
+
+        #Restriction
+        result['xsd:restriction'] = self.get_restrictions()
 
         return result
     
