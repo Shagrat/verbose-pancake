@@ -234,7 +234,20 @@ class RDFProperty:
             if label_domain not in domains:
                 continue
             if label_domain_selected and str(label_domain_selected) != label_domain:
-                continue
+                not_found = True
+                parents =  [RDFClass(x[2], self.graph) for x in self.graph.triples((label_domain_selected.uriref, RDFS.subClassOf, None))]
+                while len(parents):
+                    tParents = []
+                    for parent in parents:
+                        if parent.uriref == self.uriref:
+                            continue
+                        if str(parent) == label_domain:
+                            not_found = False
+                            break
+                        tParents +=  [RDFClass(x[2], self.graph) for x in self.graph.triples((parent.uriref, RDFS.subClassOf, None))]
+                    parents = tParents.copy()
+                if not_found:
+                    continue
             labels.append({
                 '@language': label_text[2].language,
                 '@value': str(label_text[2]),
