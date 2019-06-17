@@ -2,8 +2,8 @@ import os
 import sys
 import json
 from copy import deepcopy
-from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef
-from utils import POT, DLI, TripletTuple, uri2niceString
+from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef, BNode
+from utils import SW, POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass, RDFProperty
 from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT, CONF_NAME
 
@@ -31,7 +31,7 @@ def create_deffinition_from_rdf_class(rdf_class):
         }
     }
     for rdf_attribute in rdf_class.get_properties():
-        supported_attrs[rdf_attribute.title()]= rdf_attribute.toVocab()
+        supported_attrs[rdf_attribute.title()]= rdf_attribute.toVocab(parent_domain=rdf_class)
     supported_class['pot:supportedAttribute'] = supported_attrs
     vocabulary_dict['pot:supportedClass'] = supported_class
     return vocabulary_dict
@@ -63,7 +63,7 @@ def create_vocabulary_from_rdf_class(rdf_class):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
     total_attributes = set(rdf_class.get_properties())
     for domain in total_attributes:
-        vocabulary_dict[domain.title()] = domain.toPython()
+        vocabulary_dict[domain.title()] = domain.toPython(parent_domain=rdf_class)
     for dependent in rdf_class.get_dependents():
         vocabulary_dict[dependent.title()] = {
             'rdfs:subClassOf':{
