@@ -39,6 +39,13 @@ def create_deffinition_from_rdf_class(rdf_class):
         }
     else:
         del vocabulary_dict['@context']['description']
+
+    if not supported_class.get('pot:label', None):
+        del vocabulary_dict['@context']['label']
+
+    if not supported_class.get('pot:comment', None):
+        del vocabulary_dict['@context']['comment']
+
     supported_class['pot:supportedAttribute'] = supported_attrs
     vocabulary_dict['pot:supportedClass'] = supported_class
     return vocabulary_dict

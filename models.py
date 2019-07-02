@@ -104,15 +104,12 @@ class RDFClass:
         return uri + ':' + parents_path + self.title()
 
     def get_labels(self):
-        labels = []
+        labels = {}
         for label in self.graph.triples((self.uriref, POT.label, None)):
             if not isinstance(label[2], BNode):
                 continue
             label_node = list(self.graph.triples((label[2], None, None)))[0]
-            labels.append({
-                '@language': label_node[2].language,
-                '@value': str(label_node[2]),
-            })
+            labels[label_node[2].language] = str(label_node[2])
         return labels
 
     def toPython(self):
@@ -134,19 +131,17 @@ class RDFClass:
         #Labels
         labels = self.get_labels()
         if len(labels):
-            result['rdfs:label'] = labels
+            result['pot:label'] = labels
 
         #Comments
-        comments = []
+        comments = {}
         for comment in self.graph.triples((self.uriref, RDFS.comment, None)):
             if type(comment[2]) != Literal:
                 continue
-            comments.append({
-                '@language': comment[2].language,
-                '@value': str(comment[2]),
-            })
+            comments[comment[2].language] = str(comment[2])
+
         if len(comments):
-            result['rdfs:comment'] = comments
+            result['pot:comment'] = comments
 
         # OWL Version Info
         try:            

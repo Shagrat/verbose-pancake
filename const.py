@@ -44,7 +44,15 @@ BASE_DEFFINITION_POT = {
             "@id": "{}Vocabulary/".format(POT_EXPORT),
             "@prefix": True
         },
-        'description': ''
+        "description": {},
+        "label": {
+            '@id': 'pot:label',
+            "@container": ['@language', '@set']
+        },
+        "comment": {
+            '@id': 'pot:comment',
+            "@container": ['@language', '@set']
+        }
     },
     "@id": "{}vocabularies/.jsonld".format(POT_EXPORT),
 }
@@ -60,8 +68,8 @@ BASE_VOCABULARY_POT = {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
-    "label": '',
-    "comment": ''
+    "label": "",
+    "comment": ""
 }
 
 
