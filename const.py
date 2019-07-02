@@ -5,23 +5,24 @@ RANGE_REF = 'http://www.w3.org/2000/01/rdf-schema#range'
 SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
 #POT_BASE = 'https://standards.oftrust.net/'
 POT_BASE = 'http://verbose.terrikon.co/v1/'
+POT_EXPORT = 'https://standards.oftrust.net/v1/'
 DLI_BASE = 'https://digitalliving.github.io/standards/'
+DLI_EXPORT = 'https://standards.lifeengine.io/standards/'
 CONF_NAME = 'settings.conf'
 
 BASE_IDENTITY_POT = {
     '@version': VERSION,
-    '@vocab': "{}vocabularies/.jsonld#".format(POT_BASE),
+    '@vocab': "{}vocabularies/.jsonld#".format(POT_EXPORT),
     '@classDefinition':'',
     "pot": {
-        "@id": "{}Vocabulary/".format(POT_BASE),
+        "@id": "{}Vocabulary/".format(POT_EXPORT),
         "@prefix": True
     },
     "dli": {
-        "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+        "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
     "data": "dli:data",
-    "name": "pot:name",
 }
 
 BASE_DEFFINITION_POT = {
@@ -36,40 +37,41 @@ BASE_DEFFINITION_POT = {
             "@prefix": True
         },
         "dli": {
-            "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+            "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
             "@prefix": True
         },
         "pot": {
-            "@id": "{}Vocabulary/".format(POT_BASE),
+            "@id": "{}Vocabulary/".format(POT_EXPORT),
             "@prefix": True
         }
     },
-    "@id": "{}vocabularies/.jsonld".format(POT_BASE),
+    "@id": "{}vocabularies/.jsonld".format(POT_EXPORT),
 }
 
 
 BASE_VOCABULARY_POT = {
     '@version': VERSION,
     "pot": {
-        "@id": "{}Vocabulary/".format(POT_BASE),
+        "@id": "{}Vocabulary/".format(POT_EXPORT),
         "@prefix": True
     },
     "dli": {
-        "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+        "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
-    }
+    },
+    "label": '',
+    "comment": ''
 }
 
 
 BASE_IDENTITY_DLI = {
     '@version': VERSION,
-    '@vocab': "{}vocabularies/.jsonld#".format(DLI_BASE),
+    '@vocab': "{}vocabularies/.jsonld#".format(DLI_EXPORT),
     "dli": {
-        "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+        "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
     "data": "dli:data",
-    "name": "dli:name",
 }
 
 BASE_VOCABULARY_DLI = {
@@ -84,11 +86,11 @@ BASE_VOCABULARY_DLI = {
             "@prefix": True
         },
         "dli": {
-            "@id": "https://digitalliving.github.io/standards/ontologies/dli.jsonld#",
+            "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
             "@prefix": True
         },
-        "vocab": "{}vocabularies/.jsonld#".format(DLI_BASE)
+        "vocab": "{}vocabularies/.jsonld#".format(DLI_EXPORT)
     },
-    "@id": "{}vocabularies/.jsonld".format(DLI_BASE),
+    "@id": "{}vocabularies/.jsonld".format(DLI_EXPORT),
     "@type": "dli:Vocabulary",
 }

@@ -108,3 +108,4 @@ venv.bak/
 *.jsonld
 .vscode
 settings.conf
+.idea

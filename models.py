@@ -77,12 +77,6 @@ class RDFClass:
                 continue
             all_dependees.add(RDFClass(i[0], self.graph))
             all_dependees.union(RDFClass(i[0], self.graph).get_dependents())
-
-        for i in self.graph.triples((None, RDF.type, self.uriref)):
-            if i[0] == self.uriref:
-                continue
-            all_dependees.add(RDFClass(i[0], self.graph))
-            all_dependees.union(RDFClass(i[0], self.graph).get_dependents())
         
         return all_dependees
 
@@ -186,11 +180,22 @@ class RDFProperty:
         uri, name = name.split(':')
         return name
 
+    def get_context_name(self, domain_selected):
+        context_names = list(self.graph.triples((self.uriref, POT.contextName, None)))
+        if not len(context_names):
+            return self.title()
+        for context_data in context_names:
+            for bnode in self.graph.triples((context_data[2], POT.domain, None)):
+                if str(bnode[2]) == str(domain_selected):
+                    try:
+                        name = next(self.graph.triples((context_data[2], POT.name, None)))[2]
+                    except StopIteration:
+                        return self.title()
+                    return name
+
     def label(self, label_domain_selected=None):
-        title = None
-        for label in self.get_labels(label_domain_selected=label_domain_selected):
-            if label.get('@language') == 'en-us':
-                title = label.get('@value')
+        labels = self.get_labels(label_domain_selected=label_domain_selected)
+        title = labels.get('en-us', None)
         if not title:
             title = str(self)
         return title
@@ -222,7 +227,7 @@ class RDFProperty:
         return rdf_type
 
     def get_labels(self, label_domain_selected=None):
-        labels = []
+        labels = {}
         domains = [uri2niceString(x[2]) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
         for label in self.graph.triples((self.uriref, POT.label, None)):
             if not isinstance(label[2], BNode):
@@ -248,14 +253,11 @@ class RDFProperty:
                     parents = tParents.copy()
                 if not_found:
                     continue
-            labels.append({
-                '@language': label_text[2].language,
-                '@value': str(label_text[2]),
-            })
+            labels[label_text[2].language] = str(label_text[2])
         return labels
 
     def get_comments(self, comment_domain_selected=None):
-        comments = []
+        comments = {}
         domains = [uri2niceString(x[2]) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
         for comment in self.graph.triples((self.uriref, POT.comment, None)):
             if not isinstance(comment[2], BNode):
@@ -281,10 +283,7 @@ class RDFProperty:
                     parents = tParents.copy()
                 if not_found:
                     continue
-            comments.append({
-                '@language': comment_text[2].language,
-                '@value': str(comment_text[2]),
-            })
+            comments[comment_text[2].language] = str(comment_text[2])
         return comments
 
     def toVocab(self, noId=False, parent_domain=None):
@@ -326,12 +325,12 @@ class RDFProperty:
         #Labels
         labels = self.get_labels(label_domain_selected=parent_domain)
         if len(labels):
-            result['rdfs:label'] = labels
+            result['pot:label'] = labels
 
         #Comments
         comments = self.get_comments(comment_domain_selected=parent_domain)
         if len(comments):
-            result['rdfs:comment'] = comments
+            result['pot:comment'] = comments
 
         #Doamin
         domains = []
