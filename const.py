@@ -43,7 +43,8 @@ BASE_DEFFINITION_POT = {
         "pot": {
             "@id": "{}Vocabulary/".format(POT_EXPORT),
             "@prefix": True
-        }
+        },
+        'description': ''
     },
     "@id": "{}vocabularies/.jsonld".format(POT_EXPORT),
 }

@@ -297,10 +297,9 @@ class RDFProperty:
         if noId:
             del result['@id']
 
-
         comments = self.get_comments(comment_domain_selected=parent_domain)
         if len(comments):
-            result['dli:description'] = comments
+            result['pot:description'] = comments
 
         #Doamin
         if len(self.get_supported_range()):

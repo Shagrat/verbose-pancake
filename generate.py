@@ -15,23 +15,30 @@ def create_deffinition_from_rdf_class(rdf_class):
     vocabulary_dict['@id'] = vocabulary
     supported_class = rdf_class.toPython()
     supported_attrs = {
-        'name': {
-            "@id": 'pot:name',
-            "@type": "pot:SupportedAttribute",
-            "dli:title": "name",
-            "dli:description": "name",
-            "dli:required": True
-        },
-        'data':{
+        'data': {
             "@id": 'dli:data',
             "@type": "pot:SupportedAttribute",
             "dli:title": "data",
-            "dli:description": "data",
+            "pot:description": {
+                "en-us": "data"
+            },
             "dli:required": True,
         }
     }
-    for rdf_attribute in rdf_class.get_properties():
-        supported_attrs[rdf_attribute.get_context_name(domain_selected=rdf_class)]= rdf_attribute.toVocab(parent_domain=rdf_class)
+    total_attributes = rdf_class.get_properties()
+    languages_comments = set()
+    for rdf_attribute in total_attributes:
+        supported_attrs[rdf_attribute.get_context_name(domain_selected=rdf_class)] = rdf_attribute.toVocab(parent_domain=rdf_class)
+
+        for k, v in rdf_attribute.get_comments(comment_domain_selected=rdf_class).items():
+            languages_comments.add(k)
+    if len(languages_comments):
+        vocabulary_dict['@context']['description'] = {
+            '@id': 'pot:description',
+            "@container": ['@language', '@set']
+        }
+    else:
+        del vocabulary_dict['@context']['description']
     supported_class['pot:supportedAttribute'] = supported_attrs
     vocabulary_dict['pot:supportedClass'] = supported_class
     return vocabulary_dict
@@ -77,7 +84,7 @@ def create_vocabulary_from_rdf_class(rdf_class):
         }
     else:
         del vocabulary_dict['label']
-    if len(languages_labels):
+    if len(languages_comments):
         vocabulary_dict['comment'] = {
             '@id': 'pot:comment',
             "@container": ['@language', '@set']
