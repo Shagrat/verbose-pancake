@@ -5,7 +5,8 @@ from copy import deepcopy
 from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef, BNode
 from utils import SW, POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass, RDFProperty
-from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT, CONF_NAME, POT_EXPORT
+from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT,\
+     CONF_NAME, POT_EXPORT, BASE_DIRECTORY_POT
 
 
 def create_deffinition_from_rdf_class(rdf_class):
@@ -109,12 +110,10 @@ def create_vocabulary_from_rdf_class(rdf_class):
 
 
 def create_identity_directory_from_rdf_class(top_classes, file_path):
-    identity_dict = deepcopy(BASE_IDENTITY_POT)
+    identity_dict = deepcopy(BASE_DIRECTORY_POT)
     for child in top_classes:
         identity_dict[child.title()] = child.toPython()
     
-    del identity_dict['@vocab']
-    del identity_dict['data']
     return {
         '@context': identity_dict,
     }

@@ -25,6 +25,26 @@ BASE_IDENTITY_POT = {
     "data": "dli:data",
 }
 
+BASE_DIRECTORY_POT = {
+    '@version': VERSION,
+    "pot": {
+        "@id": "{}Vocabulary/".format(POT_EXPORT),
+        "@prefix": True
+    },
+    "dli": {
+        "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
+        "@prefix": True
+    },
+    "owl": {
+        "@id": "http://www.w3.org/2002/07/owl#",
+        "@prefix": True
+    },
+    "vs": {
+        "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
+        "@prefix": True
+    },
+}
+
 BASE_DEFFINITION_POT = {
     "@context": {
         "@version": VERSION,
@@ -34,6 +54,14 @@ BASE_DEFFINITION_POT = {
         },
         "rdfs": {
             "@id": "http://www.w3.org/2000/01/rdf-schema#",
+            "@prefix": True
+        },
+        "owl": {
+            "@id": "http://www.w3.org/2002/07/owl#",
+            "@prefix": True
+        },
+        "vs": {
+            "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
             "@prefix": True
         },
         "dli": {

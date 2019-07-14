@@ -123,6 +123,11 @@ class RDFClass:
             result['subClassOf'] = self.get_real_parents()[0].get_new_type_id()
         else:
             parents = list(self.graph.triples((self.uriref, RDFS.subClassOf, None)))
+            not_emplty_parents = []
+            for p in parents:
+                if uri2niceString(p[2]) != 'https://standards.oftrust.net/ontologies/pot.jsonld#':
+                    not_emplty_parents.append(p)
+            parents = not_emplty_parents
             if len(parents) > 1:
                 result['subClassOf'] = [x.get_new_type_id() for x in parents]
             elif len(parents) == 1:
