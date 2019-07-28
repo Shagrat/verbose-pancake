@@ -162,6 +162,13 @@ class RDFClass:
 
         return result
 
+    def check(self):
+        if len(list(self.graph.triples((self.uriref, RDFS.subClassOf, None)))):
+            for i in self.graph.triples((self.uriref, RDFS.subClassOf, None)):
+                class_type = i[2]
+                if len(list(self.graph.triples((class_type, None, None)))) == 0:
+                    print('Parent Not Exists', self, i[2])
+
     def __hash__(self):
         return hash((str(self), self.get_type()))
 
@@ -290,8 +297,8 @@ class RDFProperty:
         result = {
             '@id': uri2niceString(self.uriref, self.namespaces()),
             '@type': 'pot:SupportedAttribute',
-            "dli:title": self.label(parent_domain),
-            "dli:required": False
+            "pot:title": self.label(parent_domain),
+            "pot:required": False
         }        
 
         if noId:
@@ -303,7 +310,7 @@ class RDFProperty:
 
         #Doamin
         if len(self.get_supported_range()):
-            result['dli:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
+            result['pot:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
 
         #Restriction
         result['xsd:restriction'] = self.get_restrictions()
@@ -358,6 +365,17 @@ class RDFProperty:
             pass
 
         return result
+
+    def check(self):
+        for domain in self.graph.triples((self.uriref, RDFS.domain, None)):
+            domain_id = domain[2]
+            if len(list(self.graph.triples((domain_id, None, None)))) == 0:
+                print('Domain not exists', self, domain_id)
+
+        #Ranges
+        ranges = []
+        for r in self.graph.triples((self.uriref, RDFS.range, None)):
+            print(r[2])
 
     def __hash__(self):
         return hash((str(self), self.get_type()))

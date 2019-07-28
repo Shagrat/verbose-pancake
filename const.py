@@ -18,11 +18,11 @@ BASE_IDENTITY_POT = {
         "@id": "{}Vocabulary/".format(POT_EXPORT),
         "@prefix": True
     },
-    "dli": {
+    "pot": {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
-    "data": "dli:data",
+    "data": "pot:data",
 }
 
 BASE_DIRECTORY_POT = {
@@ -108,7 +108,7 @@ BASE_IDENTITY_DLI = {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
-    "data": "dli:data",
+    "data": "pot:data",
 }
 
 BASE_VOCABULARY_DLI = {
@@ -129,5 +129,5 @@ BASE_VOCABULARY_DLI = {
         "vocab": "{}vocabularies/.jsonld#".format(DLI_EXPORT)
     },
     "@id": "{}vocabularies/.jsonld".format(DLI_EXPORT),
-    "@type": "dli:Vocabulary",
+    "@type": "pot:Vocabulary",
 }

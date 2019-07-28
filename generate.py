@@ -17,13 +17,13 @@ def create_deffinition_from_rdf_class(rdf_class):
     supported_class = rdf_class.toPython()
     supported_attrs = {
         'data': {
-            "@id": 'dli:data',
+            "@id": 'pot:data',
             "@type": "pot:SupportedAttribute",
-            "dli:title": "data",
+            "pot:title": "data",
             "pot:description": {
                 "en-us": "data"
             },
-            "dli:required": True,
+            "pot:required": True,
         }
     }
     total_attributes = rdf_class.get_properties()
@@ -149,6 +149,7 @@ def parse(filename):
     graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
     graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Classes/', replace=True)
     graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
+    all_classes = []
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))
     all_iters.extend(list(graph.triples((None, RDF.type, RDFS.Class))))
