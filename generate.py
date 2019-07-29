@@ -155,7 +155,10 @@ def parse(filename):
     all_iters.extend(list(graph.triples((None, RDF.type, RDFS.Class))))
     all_classes = []
     for triplet in map(TripletTuple._make, all_iters):
-        all_classes.append(RDFClass(triplet.subject, graph))
+        rdf_class = RDFClass(triplet.subject, graph)
+        if str(rdf_class) in settings.get('pot_exclude'):
+            continue
+        all_classes.append(rdf_class)
     top_classes = []
     for current_class in all_classes:
         if not current_class.get_real_parents():
