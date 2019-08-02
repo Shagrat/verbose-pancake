@@ -18,7 +18,7 @@ BASE_IDENTITY_POT = {
         "@id": "{}Vocabulary/".format(POT_EXPORT),
         "@prefix": True
     },
-    "pot": {
+    "dli": {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
@@ -48,20 +48,8 @@ BASE_DIRECTORY_POT = {
 BASE_DEFFINITION_POT = {
     "@context": {
         "@version": VERSION,
-        "rdf": {
-            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-            "@prefix": True
-        },
-        "rdfs": {
-            "@id": "http://www.w3.org/2000/01/rdf-schema#",
-            "@prefix": True
-        },
-        "owl": {
-            "@id": "http://www.w3.org/2002/07/owl#",
-            "@prefix": True
-        },
-        "vs": {
-            "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
+        "xsd": {
+            "@id": "http://www.w3.org/2001/XMLSchema#",
             "@prefix": True
         },
         "dli": {
@@ -95,6 +83,21 @@ BASE_VOCABULARY_POT = {
     "dli": {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
+    },
+    "rdf": {
+        "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "@prefix": True
+    },
+    "rdfs": {
+        "@id": "http://www.w3.org/2000/01/rdf-schema#",
+        "@prefix": True
+    },
+    "owl": {
+        "@id": "http://www.w3.org/2002/07/owl#",
+        "@prefix": True
+    },
+    "vs": {
+        "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
     },
     "label": "",
     "comment": ""

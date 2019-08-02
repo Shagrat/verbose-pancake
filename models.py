@@ -148,17 +148,6 @@ class RDFClass:
         if len(comments):
             result['pot:comment'] = comments
 
-        # OWL Version Info
-        try:            
-            result['owl:versionInfo'] = next(self.graph.triples((self.uriref, OWL.versionInfo, None)))[2]
-        except Exception as e:
-            pass
-
-        # VS Status
-        try:            
-            result['vs:term_status'] = next(self.graph.triples((self.uriref, SW.term_status, None)))[2]
-        except Exception as e:
-            pass
 
         return result
 
@@ -313,7 +302,9 @@ class RDFProperty:
             result['pot:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
 
         #Restriction
-        result['xsd:restriction'] = self.get_restrictions()
+        restrictions = self.get_restrictions()
+        if restrictions:
+            result['xsd:restriction'] = restrictions
 
         return result
     

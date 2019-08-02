@@ -23,7 +23,7 @@ def create_deffinition_from_rdf_class(rdf_class):
             "pot:description": {
                 "en-us": "data"
             },
-            "pot:required": True,
+            "pot:required": False,
         }
     }
     total_attributes = rdf_class.get_properties()
@@ -156,33 +156,32 @@ def parse(filename):
     all_classes = []
     for triplet in map(TripletTuple._make, all_iters):
         rdf_class = RDFClass(triplet.subject, graph)
-        if str(rdf_class) in settings.get('pot_exclude'):
-            continue
         all_classes.append(rdf_class)
     top_classes = []
     for current_class in all_classes:
         if not current_class.get_real_parents():
             top_classes.append(current_class)
         for directory in build_directories(current_class):
-            identity_dir = os.path.join('newres/Context', directory)
-            identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
-            os.makedirs(identity_dir, exist_ok=True)
-            data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []))
-            with open(identiry_file_path, 'w', encoding='utf-8') as f:
-                f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
+            if str(current_class) not in settings.get('pot_exclude'):
+                identity_dir = os.path.join('newres/Context', directory)
+                identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
+                os.makedirs(identity_dir, exist_ok=True)
+                data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []))
+                with open(identiry_file_path, 'w', encoding='utf-8') as f:
+                    f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
 
-            if not current_class.get_dependents():
-                os.rmdir(identity_dir)
-            
-            deffinition_dir = os.path.join('newres/ClassDefinitions', directory)
-            deffinition_file_path = os.path.join(deffinition_dir, '..', '{}.jsonld'.format(current_class.title()))
-            os.makedirs(deffinition_dir, exist_ok=True)
-            data_to_dump = create_deffinition_from_rdf_class(current_class)
-            with open(deffinition_file_path, 'w', encoding='utf-8') as f:
-                f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-            
-            if not current_class.get_dependents():
-                os.rmdir(deffinition_dir)
+                if not current_class.get_dependents():
+                    os.rmdir(identity_dir)
+                
+                deffinition_dir = os.path.join('newres/ClassDefinitions', directory)
+                deffinition_file_path = os.path.join(deffinition_dir, '..', '{}.jsonld'.format(current_class.title()))
+                os.makedirs(deffinition_dir, exist_ok=True)
+                data_to_dump = create_deffinition_from_rdf_class(current_class)
+                with open(deffinition_file_path, 'w', encoding='utf-8') as f:
+                    f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
+                
+                if not current_class.get_dependents():
+                    os.rmdir(deffinition_dir)
 
             vocabulary_dir = os.path.join('newres/Vocabulary', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
