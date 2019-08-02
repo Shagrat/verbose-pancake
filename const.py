@@ -43,6 +43,10 @@ BASE_DIRECTORY_POT = {
         "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
         "@prefix": True
     },
+    "xsd": {
+        "@id": "http://www.w3.org/2001/XMLSchema#",
+        "@prefix": True
+    },
 }
 
 BASE_DEFFINITION_POT = {
@@ -98,6 +102,10 @@ BASE_VOCABULARY_POT = {
     },
     "vs": {
         "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
+    },
+    "xsd": {
+        "@id": "http://www.w3.org/2001/XMLSchema#",
+        "@prefix": True
     },
     "label": "",
     "comment": ""
