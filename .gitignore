@@ -109,3 +109,4 @@ venv.bak/
 .vscode
 settings.conf
 .idea
+generated.zip

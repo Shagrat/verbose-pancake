@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import shutil
 from copy import deepcopy
 from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef, BNode
 from utils import SW, POT, DLI, TripletTuple, uri2niceString
@@ -74,11 +75,14 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
     }
 
 
-def create_vocabulary_from_rdf_class(rdf_class):
+def create_vocabulary_from_rdf_class(rdf_class, pot_json):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
     total_attributes = set(rdf_class.get_properties())
     languages_labels = set()
     languages_comments = set()
+    for d in pot_json.get('defines'):
+        if d.get('@id') == str(rdf_class):
+            vocabulary_dict[rdf_class.title()] = d
     for domain in total_attributes:
         vocabulary_dict[domain.get_context_name(domain_selected=rdf_class)] = domain.toPython(parent_domain=rdf_class)
         for k, v in domain.get_comments(comment_domain_selected=rdf_class).items():
@@ -99,7 +103,6 @@ def create_vocabulary_from_rdf_class(rdf_class):
         }
     else:
         del vocabulary_dict['comment']
-
     for dependent in rdf_class.get_dependents():
         vocabulary_dict[dependent.title()] = {
             'rdfs:subClassOf': {
@@ -145,6 +148,7 @@ def parse(filename):
 
     with open(filename) as f:
         data = f.read()
+    pot_json = json.loads(data)
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
     graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
     graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Classes/', replace=True)
@@ -186,7 +190,7 @@ def parse(filename):
             vocabulary_dir = os.path.join('newres/Vocabulary', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(vocabulary_dir, exist_ok=True)
-            data_to_dump = create_vocabulary_from_rdf_class(current_class)
+            data_to_dump = create_vocabulary_from_rdf_class(current_class, pot_json)
             with open(vocabulary_file_path, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
             
@@ -206,7 +210,7 @@ def parse(filename):
     context_file_path = os.path.join('newres', 'Vocabulary.jsonld')
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-
+    
 if __name__ == "__main__":
     try:
         filename = sys.argv[1]
@@ -214,3 +218,9 @@ if __name__ == "__main__":
         print('You have to select file to parse, please use: python parse.py <filename.jsonld>')
         exit()
     parse(filename)
+    try:
+        archive = sys.argv[2]
+        if archive == '-a':
+            shutil.make_archive('generated', 'zip', 'newres')
+    except:
+        pass
