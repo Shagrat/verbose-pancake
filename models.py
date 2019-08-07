@@ -178,16 +178,30 @@ class RDFProperty:
 
     def get_context_name(self, domain_selected):
         context_names = list(self.graph.triples((self.uriref, POT.contextName, None)))
+        all_parents = []
+        parents = [RDFClass(x[2], self.graph) for x in self.graph.triples((domain_selected.uriref, RDFS.subClassOf, None))]
+        all_parents.extend(parents)
+        while len(parents):
+            tParents = []
+            for parent in parents:
+                if parent.uriref == self.uriref:
+                    continue
+                tParents +=  [RDFClass(x[2], self.graph) for x in self.graph.triples((parent.uriref, RDFS.subClassOf, None))]
+            all_parents.extend(tParents)
+            parents = tParents.copy()
+        all_names = list(map(lambda x: str(x), all_parents))
         if not len(context_names):
             return self.title()
         for context_data in context_names:
             for bnode in self.graph.triples((context_data[2], POT.domain, None)):
-                if str(bnode[2]) == str(domain_selected):
+                if str(bnode[2]) in all_names:
                     try:
                         name = next(self.graph.triples((context_data[2], POT.name, None)))[2]
                     except StopIteration:
                         return self.title()
                     return name
+        return self.title()
+                
 
     def label(self, label_domain_selected=None):
         labels = self.get_labels(label_domain_selected=label_domain_selected)
