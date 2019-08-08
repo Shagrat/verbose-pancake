@@ -13,6 +13,11 @@ class RDFClass:
         uri, name = name.split(':')
         return name
 
+    def context(self):
+        name = uri2niceString(self.uriref, self.namespaces())
+        uri, name = name.split(':')
+        return uri
+
     def label(self):
         title = None
         labels = []
@@ -28,7 +33,7 @@ class RDFClass:
             title = str(self)
         return title
 
-    def get_properties(self):
+    def get_properties(self, exclude_context=None):
         attributes = []
 
         parents =  [RDFClass(x[2], self.graph) for x in self.graph.triples((self.uriref, RDFS.subClassOf, None))]
@@ -38,11 +43,17 @@ class RDFClass:
                 if parent.uriref == self.uriref:
                     continue
                 for attr in self.graph.triples((None, RDFS.domain, parent.uriref)):
-                    attributes.append(RDFProperty(attr[0], self.graph))
+                    rdf_prop = RDFProperty(attr[0], self.graph)
+                    if exclude_context and rdf_prop.context() in exclude_context:
+                        continue
+                    attributes.append(rdf_prop)
                 tParents +=  [RDFClass(x[2], self.graph) for x in self.graph.triples((parent.uriref, RDFS.subClassOf, None))]
             parents = tParents.copy()
         for attr in self.graph.triples((None, RDFS.domain, self.uriref)):
-            attributes.append(RDFProperty(attr[0], self.graph))
+            rdf_prop = RDFProperty(attr[0], self.graph)
+            if exclude_context and rdf_prop.context() in exclude_context:
+                continue
+            attributes.append(rdf_prop)
         attributes = sorted(attributes, key=lambda x: str(x))
         return attributes
 
@@ -89,7 +100,6 @@ class RDFClass:
         return all_dependees
 
     def get_new_type_id(self):
-        base = POT_BASE + 'context/'
         parents_path = ''
         if self.get_real_parents():
             real_parent = self.get_real_parents()[0]
@@ -175,6 +185,35 @@ class RDFProperty:
         name = uri2niceString(self.uriref, self.namespaces())
         uri, name = name.split(':')
         return name
+
+    def context(self):
+        name = uri2niceString(self.uriref, self.namespaces())
+        uri, name = name.split(':')
+        return uri
+
+    def get_real_parents(self):
+        parents = []
+        try:
+            for parent in list(self.graph.triples((self.uriref, RDFS.subPropertyOf, None))):
+                if len(list(self.graph.triples((parent[2], None, None)))) and self.uriref != parent[2]:
+                    parents.append(RDFProperty(parent[2], self.graph))
+        except IndexError:
+            return []
+        return parents
+
+    def get_new_type_id(self):
+        parents_path = ''
+        if self.get_real_parents():
+            real_parent = self.get_real_parents()[0]
+            while real_parent:
+                parents_path = real_parent.title() + '/' + parents_path
+                if real_parent.get_real_parents():
+                    real_parent = real_parent.get_real_parents()[0]
+                else:
+                    real_parent = None
+        name = uri2niceString(self.uriref, self.namespaces())
+        uri, name = name.split(':')
+        return uri + ':' + parents_path + self.title()
 
     def get_context_name(self, domain_selected):
         context_names = list(self.graph.triples((self.uriref, POT.contextName, None)))
@@ -298,7 +337,7 @@ class RDFProperty:
 
     def toVocab(self, noId=False, parent_domain=None):
         result = {
-            '@id': uri2niceString(self.uriref, self.namespaces()),
+            '@id': self.get_new_type_id(),
             '@type': 'pot:SupportedAttribute',
             "pot:title": self.label(parent_domain),
             "pot:required": False
@@ -324,7 +363,7 @@ class RDFProperty:
     
     def toPython(self, noId=False, parent_domain=None):
         result = {
-            '@id': uri2niceString(self.uriref, self.namespaces())
+            '@id': self.get_new_type_id()
         }
 
         if noId:

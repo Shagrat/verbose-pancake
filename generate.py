@@ -65,11 +65,11 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
             continue
         if uri2niceString(rdf_class.uriref, rdf_class.namespaces()) not in flat_definition:
             identity_dict[key] = {
-                '@id':  uri2niceString(domain.uriref, domain.namespaces()),
+                '@id':  domain.get_new_type_id(),
                 '@nest': 'data'
             }
         else:
-            identity_dict[key] = uri2niceString(domain.uriref, domain.namespaces())
+            identity_dict[key] = domain.get_new_type_id()
     return {
         '@context': identity_dict
     }
@@ -77,7 +77,7 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
 
 def create_vocabulary_from_rdf_class(rdf_class, pot_json):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
-    total_attributes = set(rdf_class.get_properties())
+    total_attributes = set(rdf_class.get_properties(exclude_context=('dli',)))
     languages_labels = set()
     languages_comments = set()
     for d in pot_json.get('defines'):
