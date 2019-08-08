@@ -66,7 +66,7 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
         if uri2niceString(rdf_class.uriref, rdf_class.namespaces()) not in flat_definition:
             identity_dict[key] = {
                 '@id':  domain.get_new_type_id(),
-                '@nest': 'data'
+                '@nest': domain.get_nested_at()
             }
         else:
             identity_dict[key] = domain.get_new_type_id()
@@ -116,7 +116,7 @@ def create_identity_directory_from_rdf_class(top_classes, file_path):
     identity_dict = deepcopy(BASE_DIRECTORY_POT)
     for child in top_classes:
         identity_dict[child.title()] = child.toPython()
-    
+
     return {
         '@context': identity_dict,
     }
@@ -176,14 +176,14 @@ def parse(filename):
 
                 if not current_class.get_dependents():
                     os.rmdir(identity_dir)
-                
+
                 deffinition_dir = os.path.join('newres/ClassDefinitions', directory)
                 deffinition_file_path = os.path.join(deffinition_dir, '..', '{}.jsonld'.format(current_class.title()))
                 os.makedirs(deffinition_dir, exist_ok=True)
                 data_to_dump = create_deffinition_from_rdf_class(current_class)
                 with open(deffinition_file_path, 'w', encoding='utf-8') as f:
                     f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-                
+
                 if not current_class.get_dependents():
                     os.rmdir(deffinition_dir)
 
@@ -193,7 +193,7 @@ def parse(filename):
             data_to_dump = create_vocabulary_from_rdf_class(current_class, pot_json)
             with open(vocabulary_file_path, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-            
+
             if not current_class.get_dependents():
                 os.rmdir(vocabulary_dir)
 
@@ -210,7 +210,7 @@ def parse(filename):
     context_file_path = os.path.join('newres', 'Vocabulary.jsonld')
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-    
+
 if __name__ == "__main__":
     try:
         filename = sys.argv[1]

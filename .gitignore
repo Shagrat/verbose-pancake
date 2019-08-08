@@ -110,3 +110,4 @@ venv.bak/
 settings.conf
 .idea
 generated.zip
+fabfile.py

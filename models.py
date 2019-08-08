@@ -68,14 +68,14 @@ class RDFClass:
         return parents
 
     def get_type_object(self):
-        try:            
+        try:
             rdf_type = RDFClass(next(self.graph.triples((self.uriref, RDF.type, None)))[2], self.graph)
         except Exception as e:
             return None
         return rdf_type
 
     def get_type(self):
-        try:            
+        try:
             rdf_type = uri2niceString(next(self.graph.triples((self.uriref, RDF.type, None)))[2], self.graph.namespaces())
         except Exception as e:
             return None
@@ -88,7 +88,7 @@ class RDFClass:
                 continue
             all_dependees.add(RDFClass(i[0], self.graph))
             all_dependees.union(RDFClass(i[0], self.graph).get_dependents())
-        
+
         return all_dependees
 
     def get_children(self):
@@ -96,7 +96,7 @@ class RDFClass:
         for i in self.graph.triples((None, RDFS.subClassOf, self.uriref)):
             if i[0] == self.uriref:
                 continue
-            all_dependees.add(RDFClass(i[0], self.graph))        
+            all_dependees.add(RDFClass(i[0], self.graph))
         return all_dependees
 
     def get_new_type_id(self):
@@ -201,6 +201,15 @@ class RDFProperty:
             return []
         return parents
 
+    def get_nested_at(self):
+        try:
+            nested_at = list(self.graph.triples((self.uriref, POT.nested, None)))[0][2]
+            print(nested_at)
+            return nested_at
+        except IndexError:
+            pass
+        return 'data'
+
     def get_new_type_id(self):
         parents_path = ''
         if self.get_real_parents():
@@ -240,7 +249,7 @@ class RDFProperty:
                         return self.title()
                     return name
         return self.title()
-                
+
 
     def label(self, label_domain_selected=None):
         labels = self.get_labels(label_domain_selected=label_domain_selected)
@@ -269,7 +278,7 @@ class RDFProperty:
         return domains
 
     def get_type(self):
-        try:            
+        try:
             rdf_type = uri2niceString(next(self.graph.triples((self.uriref, RDF.type, None)))[2], self.graph.namespaces())
         except Exception as e:
             raise
@@ -341,7 +350,7 @@ class RDFProperty:
             '@type': 'pot:SupportedAttribute',
             "pot:title": self.label(parent_domain),
             "pot:required": False
-        }        
+        }
 
         if noId:
             del result['@id']
@@ -360,7 +369,7 @@ class RDFProperty:
             result['xsd:restriction'] = restrictions
 
         return result
-    
+
     def toPython(self, noId=False, parent_domain=None):
         result = {
             '@id': self.get_new_type_id()
@@ -395,15 +404,15 @@ class RDFProperty:
             ranges.append(uri2niceString(r[2]))
         if len(ranges):
             result['range'] = ranges
-        
+
         # OWL Version Info
-        try:            
+        try:
             result['owl:versionInfo'] = next(self.graph.triples((self.uriref, OWL.versionInfo, None)))[2]
         except Exception as e:
             pass
 
         # VS Status
-        try:            
+        try:
             result['vs:term_status'] = next(self.graph.triples((self.uriref, SW.term_status, None)))[2]
         except Exception as e:
             pass
