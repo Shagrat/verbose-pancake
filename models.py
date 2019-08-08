@@ -204,7 +204,6 @@ class RDFProperty:
     def get_nested_at(self):
         try:
             nested_at = list(self.graph.triples((self.uriref, POT.nested, None)))[0][2]
-            print(nested_at)
             return nested_at
         except IndexError:
             pass
