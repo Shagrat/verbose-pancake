@@ -22,7 +22,8 @@ BASE_IDENTITY_POT = {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
-    "data": "pot:data",
+    "data": "dli:data",
+    "metadata": "dli:metadata",
 }
 
 BASE_DIRECTORY_POT = {
@@ -79,36 +80,38 @@ BASE_DEFFINITION_POT = {
 
 
 BASE_VOCABULARY_POT = {
-    '@version': VERSION,
-    "pot": {
-        "@id": "{}Vocabulary/".format(POT_EXPORT),
-        "@prefix": True
-    },
-    "dli": {
-        "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
-        "@prefix": True
-    },
-    "rdf": {
-        "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "@prefix": True
-    },
-    "rdfs": {
-        "@id": "http://www.w3.org/2000/01/rdf-schema#",
-        "@prefix": True
-    },
-    "owl": {
-        "@id": "http://www.w3.org/2002/07/owl#",
-        "@prefix": True
-    },
-    "vs": {
-        "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
-    },
-    "xsd": {
-        "@id": "http://www.w3.org/2001/XMLSchema#",
-        "@prefix": True
-    },
-    "label": "",
-    "comment": ""
+    "@context": {
+        '@version': VERSION,
+        "pot": {
+            "@id": "{}Vocabulary/".format(POT_EXPORT),
+            "@prefix": True
+        },
+        "dli": {
+            "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
+            "@prefix": True
+        },
+        "rdf": {
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "@prefix": True
+        },
+        "rdfs": {
+            "@id": "http://www.w3.org/2000/01/rdf-schema#",
+            "@prefix": True
+        },
+        "owl": {
+            "@id": "http://www.w3.org/2002/07/owl#",
+            "@prefix": True
+        },
+        "vs": {
+            "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
+        },
+        "xsd": {
+            "@id": "http://www.w3.org/2001/XMLSchema#",
+            "@prefix": True
+        },
+        "label": "",
+        "comment": ""
+    }
 }
 
 
@@ -119,7 +122,7 @@ BASE_IDENTITY_DLI = {
         "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
         "@prefix": True
     },
-    "data": "pot:data",
+    "data": "dli:data",
 }
 
 BASE_VOCABULARY_DLI = {

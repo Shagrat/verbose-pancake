@@ -18,7 +18,7 @@ def create_deffinition_from_rdf_class(rdf_class):
     supported_class = rdf_class.toPython()
     supported_attrs = {
         'data': {
-            "@id": 'pot:data',
+            "@id": 'dli:data',
             "@type": "pot:SupportedAttribute",
             "pot:title": "data",
             "pot:description": {
@@ -66,8 +66,9 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
         if uri2niceString(rdf_class.uriref, rdf_class.namespaces()) not in flat_definition:
             identity_dict[key] = {
                 '@id':  domain.get_new_type_id(),
-                '@nest': domain.get_nested_at()
             }
+            if domain.get_nested_at():
+                identity_dict[key]['@nest'] = domain.get_nested_at()
         else:
             identity_dict[key] = domain.get_new_type_id()
     return {
@@ -90,19 +91,19 @@ def create_vocabulary_from_rdf_class(rdf_class, pot_json):
         for k, v in domain.get_labels(label_domain_selected=rdf_class).items():
             languages_labels.add(k)
     if len(languages_labels):
-        vocabulary_dict['label'] = {
+        vocabulary_dict['@context']['label'] = {
             '@id': 'pot:label',
             "@container": ['@language', '@set']
         }
     else:
-        del vocabulary_dict['label']
+        del vocabulary_dict['@context']['label']
     if len(languages_comments):
-        vocabulary_dict['comment'] = {
+        vocabulary_dict['@context']['comment'] = {
             '@id': 'pot:comment',
             "@container": ['@language', '@set']
         }
     else:
-        del vocabulary_dict['comment']
+        del vocabulary_dict['@context']['comment']
     for dependent in rdf_class.get_dependents():
         vocabulary_dict[dependent.title()] = {
             'rdfs:subClassOf': {

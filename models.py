@@ -207,7 +207,7 @@ class RDFProperty:
             return nested_at
         except IndexError:
             pass
-        return 'data'
+        return None
 
     def get_new_type_id(self):
         parents_path = ''
