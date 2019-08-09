@@ -61,8 +61,6 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
     total_attributes = set(rdf_class.get_properties())
     for domain in total_attributes:
         key = domain.get_context_name(domain_selected=rdf_class)
-        if key == 'name':
-            continue
         if uri2niceString(rdf_class.uriref, rdf_class.namespaces()) not in flat_definition:
             identity_dict[key] = {
                 '@id':  domain.get_new_type_id(),
