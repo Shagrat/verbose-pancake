@@ -79,23 +79,40 @@ def create_vocabulary_from_rdf_class(rdf_class, pot_json):
     total_attributes = set(rdf_class.get_properties(exclude_context=('dli',)))
     languages_labels = set()
     languages_comments = set()
+    force_label = False
+    force_comment = False
     for d in pot_json.get('defines'):
         if d.get('@id') == str(rdf_class):
-            vocabulary_dict[rdf_class.title()] = d
+            new_dict = deepcopy(d)
+            if new_dict.get('pot:label'):
+                all_labels = {}
+                force_label = True
+                for i in new_dict.get('pot:label'):
+                    all_labels[i['rdfs:label']['@language']] = i['rdfs:label']['@value']
+                new_dict['pot:label'] = all_labels
+
+            if new_dict.get('pot:comment'):
+                all_labels = {}
+                force_comment = True
+                for i in new_dict.get('pot:comment'):
+                    all_labels[i['rdfs:comment']['@language']] = i['rdfs:comment']['@value']
+                new_dict['pot:comment'] = all_labels
+
+            vocabulary_dict[rdf_class.title()] = new_dict
     for domain in total_attributes:
         vocabulary_dict[domain.get_context_name(domain_selected=rdf_class)] = domain.toPython(parent_domain=rdf_class)
         for k, v in domain.get_comments(comment_domain_selected=rdf_class).items():
             languages_comments.add(k)
         for k, v in domain.get_labels(label_domain_selected=rdf_class).items():
             languages_labels.add(k)
-    if len(languages_labels):
+    if len(languages_labels) or force_label:
         vocabulary_dict['@context']['label'] = {
             '@id': 'pot:label',
             "@container": ['@language', '@set']
         }
     else:
         del vocabulary_dict['@context']['label']
-    if len(languages_comments):
+    if len(languages_comments) or force_comment:
         vocabulary_dict['@context']['comment'] = {
             '@id': 'pot:comment',
             "@container": ['@language', '@set']

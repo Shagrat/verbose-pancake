@@ -111,7 +111,7 @@ class RDFClass:
                     real_parent = None
         name = uri2niceString(self.uriref, self.namespaces())
         uri, name = name.split(':')
-        return uri + ':' + parents_path + self.title()
+        return uri + ':' + parents_path + self.title() + '/'
 
     def get_labels(self):
         labels = {}
@@ -221,7 +221,7 @@ class RDFProperty:
                     real_parent = None
         name = uri2niceString(self.uriref, self.namespaces())
         uri, name = name.split(':')
-        return uri + ':' + parents_path + self.title()
+        return uri + ':' + parents_path + self.title() + '/'
 
     def get_context_name(self, domain_selected):
         context_names = list(self.graph.triples((self.uriref, POT.contextName, None)))
