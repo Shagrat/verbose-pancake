@@ -146,7 +146,7 @@ def parse(filename):
         print('Settings conf file syntax error')
         exit()
 
-    with open(filename) as f:
+    with open(filename, encoding='utf-8') as f:
         data = f.read()
     pot_json = json.loads(data)
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
