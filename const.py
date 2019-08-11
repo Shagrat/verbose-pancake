@@ -27,27 +27,37 @@ BASE_IDENTITY_POT = {
 }
 
 BASE_DIRECTORY_POT = {
-    '@version': VERSION,
-    "pot": {
-        "@id": "{}Vocabulary/".format(POT_EXPORT),
-        "@prefix": True
-    },
-    "dli": {
-        "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
-        "@prefix": True
-    },
-    "owl": {
-        "@id": "http://www.w3.org/2002/07/owl#",
-        "@prefix": True
-    },
-    "vs": {
-        "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
-        "@prefix": True
-    },
-    "xsd": {
-        "@id": "http://www.w3.org/2001/XMLSchema#",
-        "@prefix": True
-    },
+    '@context':{
+        '@version': VERSION,
+        "pot": {
+            "@id": "{}Vocabulary/".format(POT_EXPORT),
+            "@prefix": True
+        },
+        "dli": {
+            "@id": "https://standards.lifeengine.io/ontologies/dli.jsonld#",
+            "@prefix": True
+        },
+        "owl": {
+            "@id": "http://www.w3.org/2002/07/owl#",
+            "@prefix": True
+        },
+        "vs": {
+            "@id": "http://www.w3.org/2003/06/sw-vocab-status/ns#",
+            "@prefix": True
+        },
+        "xsd": {
+            "@id": "http://www.w3.org/2001/XMLSchema#",
+            "@prefix": True
+        },
+        "label": {
+            '@id': 'rdfs:label',
+            "@container": ['@language', '@set']
+        },
+        "comment": {
+            '@id': 'rdfs:comment',
+            "@container": ['@language', '@set']
+        }        
+    }
 }
 
 BASE_DEFFINITION_POT = {
@@ -67,11 +77,11 @@ BASE_DEFFINITION_POT = {
         },
         "description": {},
         "label": {
-            '@id': 'pot:label',
+            '@id': 'rdfs:label',
             "@container": ['@language', '@set']
         },
         "comment": {
-            '@id': 'pot:comment',
+            '@id': 'rdfs:comment',
             "@container": ['@language', '@set']
         }
     },

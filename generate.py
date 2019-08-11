@@ -42,10 +42,10 @@ def create_deffinition_from_rdf_class(rdf_class):
     else:
         del vocabulary_dict['@context']['description']
 
-    if not supported_class.get('pot:label', None):
+    if not supported_class.get('rdfs:label', None):
         del vocabulary_dict['@context']['label']
 
-    if not supported_class.get('pot:comment', None):
+    if not supported_class.get('rdfs:comment', None):
         del vocabulary_dict['@context']['comment']
 
     supported_class['pot:supportedAttribute'] = supported_attrs
@@ -89,14 +89,16 @@ def create_vocabulary_from_rdf_class(rdf_class, pot_json):
                 force_label = True
                 for i in new_dict.get('pot:label'):
                     all_labels[i['rdfs:label']['@language']] = i['rdfs:label']['@value']
-                new_dict['pot:label'] = all_labels
+                new_dict['rdfs:label'] = all_labels
+                del new_dict['pot:label']
 
             if new_dict.get('pot:comment'):
                 all_labels = {}
                 force_comment = True
                 for i in new_dict.get('pot:comment'):
                     all_labels[i['rdfs:comment']['@language']] = i['rdfs:comment']['@value']
-                new_dict['pot:comment'] = all_labels
+                new_dict['rdfs:comment'] = all_labels
+                del new_dict['pot:comment']
 
             vocabulary_dict[rdf_class.title()] = new_dict
     for domain in total_attributes:
@@ -107,14 +109,14 @@ def create_vocabulary_from_rdf_class(rdf_class, pot_json):
             languages_labels.add(k)
     if len(languages_labels) or force_label:
         vocabulary_dict['@context']['label'] = {
-            '@id': 'pot:label',
+            '@id': 'rdfs:label',
             "@container": ['@language', '@set']
         }
     else:
         del vocabulary_dict['@context']['label']
     if len(languages_comments) or force_comment:
         vocabulary_dict['@context']['comment'] = {
-            '@id': 'pot:comment',
+            '@id': 'rdfs:comment',
             "@container": ['@language', '@set']
         }
     else:
@@ -133,9 +135,7 @@ def create_identity_directory_from_rdf_class(top_classes, file_path):
     for child in top_classes:
         identity_dict[child.title()] = child.toPython()
 
-    return {
-        '@context': identity_dict,
-    }
+    return identity_dict
 
 
 def build_directories(rdf_class):

@@ -111,7 +111,7 @@ class RDFClass:
                     real_parent = None
         name = uri2niceString(self.uriref, self.namespaces())
         uri, name = name.split(':')
-        return uri + ':' + parents_path + self.title() + '/'
+        return uri + ':' + parents_path + self.title()
 
     def get_labels(self):
         labels = {}
@@ -146,7 +146,7 @@ class RDFClass:
         #Labels
         labels = self.get_labels()
         if len(labels):
-            result['pot:label'] = labels
+            result['rdfs:label'] = labels
 
         #Comments
         comments = {}
@@ -156,7 +156,7 @@ class RDFClass:
             comments[comment[2].language] = str(comment[2])
 
         if len(comments):
-            result['pot:comment'] = comments
+            result['rdfs:comment'] = comments
 
 
         return result
@@ -221,7 +221,7 @@ class RDFProperty:
                     real_parent = None
         name = uri2niceString(self.uriref, self.namespaces())
         uri, name = name.split(':')
-        return uri + ':' + parents_path + self.title() + '/'
+        return uri + ':' + parents_path + self.title()
 
     def get_context_name(self, domain_selected):
         context_names = list(self.graph.triples((self.uriref, POT.contextName, None)))
@@ -347,12 +347,18 @@ class RDFProperty:
         result = {
             '@id': self.get_new_type_id(),
             '@type': 'pot:SupportedAttribute',
+            'subPropertyOf':'',
             "pot:title": self.label(parent_domain),
             "pot:required": False
         }
 
         if noId:
             del result['@id']
+        
+        if self.get_real_parents():
+            result['subPropertyOf'] = str(self.get_real_parents()[0])
+        else:
+            del result['subPropertyOf']
 
         comments = self.get_comments(comment_domain_selected=parent_domain)
         if len(comments):
@@ -380,15 +386,18 @@ class RDFProperty:
         # Determine type
         result['@type'] = self.get_type()
 
+        if self.get_real_parents():
+            result['subPropertyOf'] = str(self.get_real_parents()[0])
+
         #Labels
         labels = self.get_labels(label_domain_selected=parent_domain)
         if len(labels):
-            result['pot:label'] = labels
+            result['rdfs:label'] = labels
 
         #Comments
         comments = self.get_comments(comment_domain_selected=parent_domain)
         if len(comments):
-            result['pot:comment'] = comments
+            result['rdfs:comment'] = comments
 
         #Doamin
         domains = []
