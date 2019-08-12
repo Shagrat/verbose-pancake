@@ -1,5 +1,5 @@
 from rdflib import RDF, RDFS, Literal, OWL, XSD, BNode
-from utils import uri2niceString, SW, POT
+from utils import uri2niceString, SW, POT, DLI
 from const import POT_BASE
 
 class RDFClass:
@@ -21,7 +21,7 @@ class RDFClass:
     def label(self):
         title = None
         labels = []
-        for label in self.graph.triples((self.uriref, POT.label, None)):
+        for label in self.graph.triples((self.uriref, DLI.label, None)):
             if not isinstance(label[2], BNode):
                 continue
             label_node = list(self.graph.triples((label[2], None, None)))[0]
@@ -115,7 +115,7 @@ class RDFClass:
 
     def get_labels(self):
         labels = {}
-        for label in self.graph.triples((self.uriref, POT.label, None)):
+        for label in self.graph.triples((self.uriref, DLI.label, None)):
             if not isinstance(label[2], BNode):
                 continue
             label_node = list(self.graph.triples((label[2], None, None)))[0]
@@ -141,7 +141,8 @@ class RDFClass:
             if len(parents) > 1:
                 result['subClassOf'] = [x.get_new_type_id() for x in parents]
             elif len(parents) == 1:
-                result['subClassOf'] = uri2niceString(parents[0][2], self.graph)
+                print(uri2niceString(parents[0][2], self.graph.namespaces()))
+                result['subClassOf'] = uri2niceString(parents[0][2], self.graph.namespaces())
 
         #Labels
         labels = self.get_labels()
@@ -286,10 +287,10 @@ class RDFProperty:
     def get_labels(self, label_domain_selected=None):
         labels = {}
         domains = [uri2niceString(x[2]) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
-        for label in self.graph.triples((self.uriref, POT.label, None)):
+        for label in self.graph.triples((self.uriref, DLI.label, None)):
             if not isinstance(label[2], BNode):
                 continue
-            label_domain = list(self.graph.triples((label[2], POT.domain, None)))[0]
+            label_domain = list(self.graph.triples((label[2], DLI.domain, None)))[0]
             label_text = list(self.graph.triples((label[2], RDFS.label, None)))[0]
             if isinstance(label_domain[2], Literal):
                 label_domain = str(label_domain[2])
@@ -297,7 +298,7 @@ class RDFProperty:
                 continue
             if label_domain_selected and str(label_domain_selected) != label_domain:
                 not_found = True
-                parents =  [RDFClass(x[2], self.graph) for x in self.graph.triples((label_domain_selected.uriref, RDFS.subClassOf, None))]
+                parents = [RDFClass(x[2], self.graph) for x in self.graph.triples((label_domain_selected.uriref, RDFS.subClassOf, None))]
                 while len(parents):
                     tParents = []
                     for parent in parents:
@@ -316,10 +317,10 @@ class RDFProperty:
     def get_comments(self, comment_domain_selected=None):
         comments = {}
         domains = [uri2niceString(x[2]) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
-        for comment in self.graph.triples((self.uriref, POT.comment, None)):
+        for comment in self.graph.triples((self.uriref, DLI.comment, None)):
             if not isinstance(comment[2], BNode):
                 continue
-            comment_domain = list(self.graph.triples((comment[2], POT.domain, None)))[0]
+            comment_domain = list(self.graph.triples((comment[2], DLI.domain, None)))[0]
             comment_text = list(self.graph.triples((comment[2], RDFS.comment, None)))[0]
             if isinstance(comment_domain[2], Literal):
                 comment_domain = str(comment_domain[2])
@@ -354,7 +355,7 @@ class RDFProperty:
 
         if noId:
             del result['@id']
-        
+
         if self.get_real_parents():
             result['subPropertyOf'] = str(self.get_real_parents()[0])
         else:
