@@ -141,7 +141,6 @@ class RDFClass:
             if len(parents) > 1:
                 result['subClassOf'] = [x.get_new_type_id() for x in parents]
             elif len(parents) == 1:
-                print(uri2niceString(parents[0][2], self.graph.namespaces()))
                 result['subClassOf'] = uri2niceString(parents[0][2], self.graph.namespaces())
 
         #Labels
