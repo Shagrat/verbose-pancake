@@ -7,12 +7,15 @@ from rdflib import ConjunctiveGraph, RDF, RDFS, OWL, URIRef, BNode
 from utils import SW, POT, DLI, TripletTuple, uri2niceString
 from models import RDFClass, RDFProperty
 from const import BASE_DEFFINITION_POT, POT_BASE, BASE_IDENTITY_POT, BASE_VOCABULARY_POT,\
-     CONF_NAME, POT_EXPORT, BASE_DIRECTORY_POT
+     CONF_NAME, POT_EXPORT, BASE_DIRECTORY_POT, DLI_EXPORT
 
 
-def create_deffinition_from_rdf_class(rdf_class):
+def create_deffinition_from_rdf_class(rdf_class, current_context):
     vocabulary_dict = deepcopy(BASE_DEFFINITION_POT)
-    vocabulary = '{}Vocabulary/{}'.format(POT_EXPORT, rdf_class.get_new_type_id()[4:])
+    if current_context == 'pot':
+        vocabulary = '{}Vocabulary/{}'.format(POT_EXPORT, rdf_class.get_new_type_id()[4:])
+    else:
+        vocabulary = '{}Vocabulary/{}'.format(DLI_EXPORT, rdf_class.get_new_type_id()[4:])
     vocabulary_dict['@context']['@vocab'] = vocabulary
     vocabulary_dict['@id'] = vocabulary
     supported_class = rdf_class.toPython()
@@ -53,10 +56,14 @@ def create_deffinition_from_rdf_class(rdf_class):
     return vocabulary_dict
 
 
-def create_identity_from_rdf_class(rdf_class, flat_definition):
+def create_identity_from_rdf_class(rdf_class, flat_definition, current_context):
     identity_dict = deepcopy(BASE_IDENTITY_POT)
-    vocabulary = '{}ClassDefinitions/{}'.format(POT_EXPORT, rdf_class.get_new_type_id()[4:])
-    identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_EXPORT, rdf_class.get_new_type_id()[4:])
+    if current_context == 'pot':
+        vocabulary = '{}ClassDefinitions/{}'.format(POT_EXPORT, rdf_class.get_new_type_id()[4:])
+        identity_dict['@vocab'] = '{}Vocabulary/{}'.format(POT_EXPORT, rdf_class.get_new_type_id()[4:])
+    else:
+        vocabulary = '{}ClassDefinitions/{}'.format(DLI_EXPORT, rdf_class.get_new_type_id()[4:])
+        identity_dict['@vocab'] = '{}Vocabulary/{}'.format(DLI_EXPORT, rdf_class.get_new_type_id()[4:])
     identity_dict['@classDefinition'] = vocabulary
     total_attributes = set(rdf_class.get_properties())
     for domain in total_attributes:
@@ -188,7 +195,7 @@ def parse(filename):
                 identity_dir = os.path.join(result_dir_name, 'Context', directory)
                 identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
                 os.makedirs(identity_dir, exist_ok=True)
-                data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []))
+                data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []), context_name)
                 with open(identiry_file_path, 'w', encoding='utf-8') as f:
                     f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
 
@@ -198,7 +205,7 @@ def parse(filename):
                 deffinition_dir = os.path.join(result_dir_name, 'ClassDefinitions', directory)
                 deffinition_file_path = os.path.join(deffinition_dir, '..', '{}.jsonld'.format(current_class.title()))
                 os.makedirs(deffinition_dir, exist_ok=True)
-                data_to_dump = create_deffinition_from_rdf_class(current_class)
+                data_to_dump = create_deffinition_from_rdf_class(current_class, context_name)
                 with open(deffinition_file_path, 'w', encoding='utf-8') as f:
                     f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
 
