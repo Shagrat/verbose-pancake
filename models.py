@@ -33,7 +33,7 @@ class RDFClass:
             title = str(self)
         return title
 
-    def get_properties(self, exclude_context=None):
+    def get_properties(self, only_context=None):
         attributes = []
 
         parents =  [RDFClass(x[2], self.graph) for x in self.graph.triples((self.uriref, RDFS.subClassOf, None))]
@@ -44,14 +44,14 @@ class RDFClass:
                     continue
                 for attr in self.graph.triples((None, RDFS.domain, parent.uriref)):
                     rdf_prop = RDFProperty(attr[0], self.graph)
-                    if exclude_context and rdf_prop.context() in exclude_context:
+                    if only_context and rdf_prop.context() != only_context:
                         continue
                     attributes.append(rdf_prop)
                 tParents +=  [RDFClass(x[2], self.graph) for x in self.graph.triples((parent.uriref, RDFS.subClassOf, None))]
             parents = tParents.copy()
         for attr in self.graph.triples((None, RDFS.domain, self.uriref)):
             rdf_prop = RDFProperty(attr[0], self.graph)
-            if exclude_context and rdf_prop.context() in exclude_context:
+            if only_context and rdf_prop.context() != only_context:
                 continue
             attributes.append(rdf_prop)
         attributes = sorted(attributes, key=lambda x: str(x))
@@ -203,7 +203,7 @@ class RDFProperty:
 
     def get_nested_at(self):
         try:
-            nested_at = list(self.graph.triples((self.uriref, POT.nested, None)))[0][2]
+            nested_at = list(self.graph.triples((self.uriref, DLI.nested, None)))[0][2]
             return nested_at
         except IndexError:
             pass
@@ -224,7 +224,7 @@ class RDFProperty:
         return uri + ':' + parents_path + self.title()
 
     def get_context_name(self, domain_selected):
-        context_names = list(self.graph.triples((self.uriref, POT.contextName, None)))
+        context_names = list(self.graph.triples((self.uriref, DLI.contextName, None)))
         all_parents = []
         parents = [RDFClass(x[2], self.graph) for x in self.graph.triples((domain_selected.uriref, RDFS.subClassOf, None))]
         all_parents.extend(parents)
@@ -240,10 +240,10 @@ class RDFProperty:
         if not len(context_names):
             return self.title()
         for context_data in context_names:
-            for bnode in self.graph.triples((context_data[2], POT.domain, None)):
+            for bnode in self.graph.triples((context_data[2], DLI.domain, None)):
                 if str(bnode[2]) in all_names:
                     try:
-                        name = next(self.graph.triples((context_data[2], POT.name, None)))[2]
+                        name = next(self.graph.triples((context_data[2], DLI.name, None)))[2]
                     except StopIteration:
                         return self.title()
                     return name

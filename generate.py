@@ -74,9 +74,9 @@ def create_identity_from_rdf_class(rdf_class, flat_definition):
     }
 
 
-def create_vocabulary_from_rdf_class(rdf_class, pot_json):
+def create_vocabulary_from_rdf_class(rdf_class, pot_json, current_onto):
     vocabulary_dict = deepcopy(BASE_VOCABULARY_POT)
-    total_attributes = set(rdf_class.get_properties(exclude_context=('dli',)))
+    total_attributes = set(rdf_class.get_properties(only_context=current_onto))
     languages_labels = set()
     languages_comments = set()
     force_label = False
@@ -164,8 +164,8 @@ def parse(filename):
 
     with open(filename, encoding='utf-8') as f:
         data = f.read()
-    filename, file_extension = os.path.splitext(filename)
-    result_dir_name = os.path.join('newres', filename)
+    context_name, file_extension = os.path.splitext(filename)
+    result_dir_name = os.path.join('newres', context_name)
     pot_json = json.loads(data)
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
     graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
@@ -208,7 +208,7 @@ def parse(filename):
             vocabulary_dir = os.path.join(result_dir_name, 'Vocabulary', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(vocabulary_dir, exist_ok=True)
-            data_to_dump = create_vocabulary_from_rdf_class(current_class, pot_json)
+            data_to_dump = create_vocabulary_from_rdf_class(current_class, pot_json, context_name)
             with open(vocabulary_file_path, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
 
