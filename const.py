@@ -7,7 +7,7 @@ SUBCLASS_REF = 'http://www.w3.org/2000/01/rdf-schema#subClassOf'
 POT_BASE = 'http://verbose.terrikon.co/v1/'
 POT_EXPORT = 'https://standards.oftrust.net/v1/'
 DLI_BASE = 'https://digitalliving.github.io/standards/'
-DLI_EXPORT = 'https://standards.lifeengine.io/v1/Vocabulary/'
+DLI_EXPORT = 'https://standards.lifeengine.io/v1/'
 CONF_NAME = 'settings.conf'
 
 BASE_IDENTITY_POT = {
