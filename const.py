@@ -19,7 +19,7 @@ BASE_IDENTITY_POT = {
         "@prefix": True
     },
     "dli": {
-        "@id": "https://standards.lifeengine.io/v1/Vocabulary/dli.jsonld#",
+        "@id": "https://standards.lifeengine.io/v1/Vocabulary/",
         "@prefix": True
     },
     "data": "dli:data",
@@ -34,7 +34,7 @@ BASE_DIRECTORY_POT = {
             "@prefix": True
         },
         "dli": {
-            "@id": "https://standards.lifeengine.io/v1/Vocabulary/dli.jsonld#",
+            "@id": "https://standards.lifeengine.io/v1/Vocabulary/",
             "@prefix": True
         },
         "owl": {
@@ -68,7 +68,7 @@ BASE_DEFFINITION_POT = {
             "@prefix": True
         },
         "dli": {
-            "@id": "https://standards.lifeengine.io/v1/Vocabulary/dli.jsonld#",
+            "@id": "https://standards.lifeengine.io/v1/Vocabulary/",
             "@prefix": True
         },
         "pot": {
@@ -97,7 +97,7 @@ BASE_VOCABULARY_POT = {
             "@prefix": True
         },
         "dli": {
-            "@id": "https://standards.lifeengine.io/v1/Vocabulary/dli.jsonld#",
+            "@id": "https://standards.lifeengine.io/v1/Vocabulary/",
             "@prefix": True
         },
         "rdf": {
@@ -129,7 +129,7 @@ BASE_IDENTITY_DLI = {
     '@version': VERSION,
     '@vocab': "{}vocabularies/.jsonld#".format(DLI_EXPORT),
     "dli": {
-        "@id": "https://standards.lifeengine.io/v1/Vocabulary/dli.jsonld#",
+        "@id": "https://standards.lifeengine.io/v1/Vocabulary/",
         "@prefix": True
     },
     "data": "dli:data",
@@ -147,7 +147,7 @@ BASE_VOCABULARY_DLI = {
             "@prefix": True
         },
         "dli": {
-            "@id": "https://standards.lifeengine.io/v1/Vocabulary/dli.jsonld#",
+            "@id": "https://standards.lifeengine.io/v1/Vocabulary/",
             "@prefix": True
         },
         "vocab": "{}vocabularies/.jsonld#".format(DLI_EXPORT)
