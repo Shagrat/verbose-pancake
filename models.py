@@ -346,10 +346,10 @@ class RDFProperty:
     def toVocab(self, noId=False, parent_domain=None):
         result = {
             '@id': self.get_new_type_id(),
-            '@type': 'pot:SupportedAttribute',
+            '@type': 'dli:SupportedAttribute',
             'subPropertyOf':'',
-            "pot:title": self.label(parent_domain),
-            "pot:required": False
+            "dli:title": self.label(parent_domain),
+            "dli:required": False
         }
 
         if noId:
@@ -362,11 +362,11 @@ class RDFProperty:
 
         comments = self.get_comments(comment_domain_selected=parent_domain)
         if len(comments):
-            result['pot:description'] = comments
+            result['dli:description'] = comments
 
         #Doamin
         if len(self.get_supported_range()):
-            result['pot:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
+            result['dli:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
 
         #Restriction
         restrictions = self.get_restrictions()

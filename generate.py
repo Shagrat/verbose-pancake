@@ -19,12 +19,12 @@ def create_deffinition_from_rdf_class(rdf_class):
     supported_attrs = {
         'data': {
             "@id": 'dli:data',
-            "@type": "pot:SupportedAttribute",
-            "pot:title": "data",
-            "pot:description": {
+            "@type": "dli:SupportedAttribute",
+            "dli:title": "data",
+            "dli:description": {
                 "en-us": "data"
             },
-            "pot:required": False,
+            "dli:required": False,
         }
     }
     total_attributes = rdf_class.get_properties()
@@ -36,7 +36,7 @@ def create_deffinition_from_rdf_class(rdf_class):
             languages_comments.add(k)
     if len(languages_comments):
         vocabulary_dict['@context']['description'] = {
-            '@id': 'pot:description',
+            '@id': 'dli:description',
             "@container": ['@language', '@set']
         }
     else:
@@ -48,8 +48,8 @@ def create_deffinition_from_rdf_class(rdf_class):
     if not supported_class.get('rdfs:comment', None):
         del vocabulary_dict['@context']['comment']
 
-    supported_class['pot:supportedAttribute'] = supported_attrs
-    vocabulary_dict['pot:supportedClass'] = supported_class
+    supported_class['dli:supportedAttribute'] = supported_attrs
+    vocabulary_dict['dli:supportedClass'] = supported_class
     return vocabulary_dict
 
 
@@ -84,21 +84,21 @@ def create_vocabulary_from_rdf_class(rdf_class, pot_json):
     for d in pot_json.get('defines'):
         if d.get('@id') == str(rdf_class):
             new_dict = deepcopy(d)
-            if new_dict.get('pot:label'):
+            if new_dict.get('dli:label'):
                 all_labels = {}
                 force_label = True
-                for i in new_dict.get('pot:label'):
+                for i in new_dict.get('dli:label'):
                     all_labels[i['rdfs:label']['@language']] = i['rdfs:label']['@value']
                 new_dict['rdfs:label'] = all_labels
-                del new_dict['pot:label']
+                del new_dict['dli:label']
 
-            if new_dict.get('pot:comment'):
+            if new_dict.get('dli:comment'):
                 all_labels = {}
                 force_comment = True
-                for i in new_dict.get('pot:comment'):
+                for i in new_dict.get('dli:comment'):
                     all_labels[i['rdfs:comment']['@language']] = i['rdfs:comment']['@value']
                 new_dict['rdfs:comment'] = all_labels
-                del new_dict['pot:comment']
+                del new_dict['dli:comment']
 
             vocabulary_dict[rdf_class.title()] = new_dict
     for domain in total_attributes:
@@ -164,6 +164,8 @@ def parse(filename):
 
     with open(filename, encoding='utf-8') as f:
         data = f.read()
+    filename, file_extension = os.path.splitext(filename)
+    result_dir_name = os.path.join('newres', filename)
     pot_json = json.loads(data)
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
     graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
@@ -183,7 +185,7 @@ def parse(filename):
             top_classes.append(current_class)
         for directory in build_directories(current_class):
             if str(current_class) not in settings.get('pot_exclude'):
-                identity_dir = os.path.join('newres/Context', directory)
+                identity_dir = os.path.join(result_dir_name, 'Context', directory)
                 identiry_file_path = os.path.join(identity_dir, '..', '{}.jsonld'.format(current_class.title()))
                 os.makedirs(identity_dir, exist_ok=True)
                 data_to_dump = create_identity_from_rdf_class(current_class, settings.get('flat_definition', []))
@@ -193,7 +195,7 @@ def parse(filename):
                 if not current_class.get_dependents():
                     os.rmdir(identity_dir)
 
-                deffinition_dir = os.path.join('newres/ClassDefinitions', directory)
+                deffinition_dir = os.path.join(result_dir_name, 'ClassDefinitions', directory)
                 deffinition_file_path = os.path.join(deffinition_dir, '..', '{}.jsonld'.format(current_class.title()))
                 os.makedirs(deffinition_dir, exist_ok=True)
                 data_to_dump = create_deffinition_from_rdf_class(current_class)
@@ -203,7 +205,7 @@ def parse(filename):
                 if not current_class.get_dependents():
                     os.rmdir(deffinition_dir)
 
-            vocabulary_dir = os.path.join('newres/Vocabulary', directory)
+            vocabulary_dir = os.path.join(result_dir_name, 'Vocabulary', directory)
             vocabulary_file_path = os.path.join(vocabulary_dir, '..', '{}.jsonld'.format(current_class.title()))
             os.makedirs(vocabulary_dir, exist_ok=True)
             data_to_dump = create_vocabulary_from_rdf_class(current_class, pot_json)
@@ -213,17 +215,17 @@ def parse(filename):
             if not current_class.get_dependents():
                 os.rmdir(vocabulary_dir)
 
-    context_file_path = os.path.join('newres/Vocabulary', 'vocabulary.jsonld')
+    context_file_path = os.path.join(result_dir_name, 'Vocabulary', 'vocabulary.jsonld')
     data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-    context_file_path = os.path.join('newres/Vocabulary', 'Vocabulary.jsonld')
+    context_file_path = os.path.join(result_dir_name, 'Vocabulary', 'Vocabulary.jsonld')
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-    context_file_path = os.path.join('newres', 'vocabulary.jsonld')
+    context_file_path = os.path.join(result_dir_name, 'vocabulary.jsonld')
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
-    context_file_path = os.path.join('newres', 'Vocabulary.jsonld')
+    context_file_path = os.path.join(result_dir_name, 'Vocabulary.jsonld')
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
 

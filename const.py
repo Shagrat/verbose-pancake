@@ -27,7 +27,7 @@ BASE_IDENTITY_POT = {
 }
 
 BASE_DIRECTORY_POT = {
-    '@context':{
+    '@context': {
         '@version': VERSION,
         "pot": {
             "@id": "{}Vocabulary/".format(POT_EXPORT),
@@ -56,7 +56,7 @@ BASE_DIRECTORY_POT = {
         "comment": {
             '@id': 'rdfs:comment',
             "@container": ['@language', '@set']
-        }        
+        }
     }
 }
 
@@ -153,5 +153,5 @@ BASE_VOCABULARY_DLI = {
         "vocab": "{}vocabularies/.jsonld#".format(DLI_EXPORT)
     },
     "@id": "{}vocabularies/.jsonld".format(DLI_EXPORT),
-    "@type": "pot:Vocabulary",
+    "@type": "dli:Vocabulary",
 }
