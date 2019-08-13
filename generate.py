@@ -175,9 +175,9 @@ def parse(filename):
     result_dir_name = os.path.join('newres', context_name)
     pot_json = json.loads(data)
     graph = ConjunctiveGraph().parse(data=data, format='json-ld')
-    graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
-    graph.namespace_manager.bind('pot', 'https://standards.oftrust.net/Classes/', replace=True)
-    graph.namespace_manager.bind('dli', 'https://digitalliving.github.io/standards/ontologies/dli.jsonld#', replace=True)
+    #graph.namespace_manager.bind('pot', POT_BASE + 'Classes/', replace=True)
+    graph.namespace_manager.bind('pot', POT, replace=True)
+    graph.namespace_manager.bind('dli', DLI, replace=True)
     all_classes = []
     all_iters = list(graph.triples((None, RDF.type, POT.Class)))
     all_iters.extend(list(graph.triples((None, RDF.type, DLI.Class))))

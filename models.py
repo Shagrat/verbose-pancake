@@ -267,7 +267,7 @@ class RDFProperty:
         restriction = {}
         for item in self.graph.triples((self.uriref, XSD.restriction, None)):
             for bnode in self.graph.triples((item[2], None, None)):
-                restriction[uri2niceString(bnode[1])] = bnode[2]
+                restriction[uri2niceString(bnode[1], self.graph.namespaces())] = bnode[2]
         return restriction
 
     def get_domains(self):
@@ -285,7 +285,7 @@ class RDFProperty:
 
     def get_labels(self, label_domain_selected=None):
         labels = {}
-        domains = [uri2niceString(x[2]) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
+        domains = [uri2niceString(x[2], self.graph.namespaces()) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
         for label in self.graph.triples((self.uriref, DLI.label, None)):
             if not isinstance(label[2], BNode):
                 continue
@@ -315,7 +315,7 @@ class RDFProperty:
 
     def get_comments(self, comment_domain_selected=None):
         comments = {}
-        domains = [uri2niceString(x[2]) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
+        domains = [uri2niceString(x[2], self.graph.namespaces()) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
         for comment in self.graph.triples((self.uriref, DLI.comment, None)):
             if not isinstance(comment[2], BNode):
                 continue
@@ -402,14 +402,14 @@ class RDFProperty:
         #Doamin
         domains = []
         for domain in self.graph.triples((self.uriref, RDFS.domain, None)):
-            domains.append(uri2niceString(domain[2]))
+            domains.append(uri2niceString(domain[2], self.graph.namespaces()))
         if len(domains):
             result['domain'] = domains
 
         #Ranges
         ranges = []
         for r in self.graph.triples((self.uriref, RDFS.range, None)):
-            ranges.append(uri2niceString(r[2]))
+            ranges.append(uri2niceString(r[2], self.graph.namespaces()))
         if len(ranges):
             result['range'] = ranges
 

@@ -1,8 +1,8 @@
 from collections import namedtuple
 import rdflib
 
-POT = rdflib.Namespace('https://standards.oftrust.net/Classes/')
-DLI = rdflib.Namespace('https://digitalliving.github.io/standards/ontologies/dli.jsonld#')
+POT = rdflib.Namespace('https://standards.oftrust.net/v1/Vocabulary/')
+DLI = rdflib.Namespace('https://standards.lifeengine.io/v1/Vocabulary/')
 SW = rdflib.Namespace('http://www.w3.org/2003/06/sw-vocab-status/ns#')
 
 TripletTuple = namedtuple('TripletTuple', 'subject, predicate, object')
@@ -51,13 +51,14 @@ def uri2niceString(aUri, namespaces=None):
     """
     if not namespaces:
         namespaces = NAMESPACES_DEFAULT
-
     if not aUri:
         stringa = ""
     elif type(aUri) == rdflib.term.URIRef:
         # we have a URI: try to create a qName
         stringa = aUri.toPython()
         for aNamespaceTuple in namespaces:
+            if aNamespaceTuple[0] == '':
+                continue
             try:  # check if it matches the available NS
                 if stringa.find(aNamespaceTuple[1].__str__()) == 0:
                     if aNamespaceTuple[0]:  # for base NS, it's empty
