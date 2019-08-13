@@ -283,13 +283,30 @@ class RDFProperty:
             raise
         return rdf_type
 
+    def get_required(self):
+        try:
+            required = str(next(self.graph.triples((self.uriref, DLI.required, None)))[2]) == "true"
+        except Exception as e:
+            return False
+        return required
+
+    def get_readonly(self):
+        try:
+            readonly = str(next(self.graph.triples((self.uriref, DLI.readonly, None)))[2]) == "true"
+        except Exception as e:
+            return False
+        return readonly
+
     def get_labels(self, label_domain_selected=None):
         labels = {}
         domains = [uri2niceString(x[2], self.graph.namespaces()) for x in self.graph.triples((self.uriref, RDFS.domain, None))]
         for label in self.graph.triples((self.uriref, DLI.label, None)):
             if not isinstance(label[2], BNode):
                 continue
-            label_domain = list(self.graph.triples((label[2], DLI.domain, None)))[0]
+            try:
+                label_domain = list(self.graph.triples((label[2], DLI.domain, None)))[0]
+            except IndexError:
+                continue
             label_text = list(self.graph.triples((label[2], RDFS.label, None)))[0]
             if isinstance(label_domain[2], Literal):
                 label_domain = str(label_domain[2])
@@ -311,6 +328,16 @@ class RDFProperty:
                 if not_found:
                     continue
             labels[label_text[2].language] = str(label_text[2])
+        if not labels:
+            for label in self.graph.triples((self.uriref, DLI.label, None)):
+                if not isinstance(label[2], BNode):
+                    continue
+                try:
+                    label_domain = list(self.graph.triples((label[2], DLI.domain, None)))[0]
+                    continue
+                except IndexError:
+                    label_text = list(self.graph.triples((label[2], RDFS.label, None)))[0]
+                    labels[label_text[2].language] = str(label_text[2])
         return labels
 
     def get_comments(self, comment_domain_selected=None):
@@ -319,7 +346,10 @@ class RDFProperty:
         for comment in self.graph.triples((self.uriref, DLI.comment, None)):
             if not isinstance(comment[2], BNode):
                 continue
-            comment_domain = list(self.graph.triples((comment[2], DLI.domain, None)))[0]
+            try:
+                comment_domain = list(self.graph.triples((comment[2], DLI.domain, None)))[0]
+            except IndexError:
+                continue
             comment_text = list(self.graph.triples((comment[2], RDFS.comment, None)))[0]
             if isinstance(comment_domain[2], Literal):
                 comment_domain = str(comment_domain[2])
@@ -341,6 +371,16 @@ class RDFProperty:
                 if not_found:
                     continue
             comments[comment_text[2].language] = str(comment_text[2])
+        if not comments:
+            for comment in self.graph.triples((self.uriref, DLI.comment, None)):
+                if not isinstance(comment[2], BNode):
+                    continue
+                try:
+                    comment_domain = list(self.graph.triples((comment[2], DLI.domain, None)))[0]
+                    continue
+                except IndexError:
+                    comment_text = list(self.graph.triples((comment[2], RDFS.comment, None)))[0]
+                    comments[comment_text[2].language] = str(comment_text[2])
         return comments
 
     def toVocab(self, noId=False, parent_domain=None):
@@ -349,7 +389,8 @@ class RDFProperty:
             '@type': 'dli:SupportedAttribute',
             'subPropertyOf':'',
             "dli:title": self.label(parent_domain),
-            "dli:required": False
+            "dli:required": self.get_required(),
+            "dli:readonly": self.get_readonly()
         }
 
         if noId:
@@ -364,11 +405,11 @@ class RDFProperty:
         if len(comments):
             result['dli:description'] = comments
 
-        #Doamin
+        # Domain
         if len(self.get_supported_range()):
             result['dli:valueType'] = [x.get_new_type_id() for x in self.get_supported_range()]
 
-        #Restriction
+        # Restriction
         restrictions = self.get_restrictions()
         if restrictions:
             result['xsd:restriction'] = restrictions
