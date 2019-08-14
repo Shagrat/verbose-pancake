@@ -222,11 +222,8 @@ def parse(filename):
             if not current_class.get_dependents():
                 os.rmdir(vocabulary_dir)
 
-    context_file_path = os.path.join(result_dir_name, 'Vocabulary', 'Vocabulary.jsonld')
-    data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
-    with open(context_file_path, 'w', encoding='utf-8') as f:
-        f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
     context_file_path = os.path.join(result_dir_name, 'Vocabulary.jsonld')
+    data_to_dump = create_identity_directory_from_rdf_class(top_classes, context_file_path)
     with open(context_file_path, 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_to_dump, indent=4, separators=(',', ': '), ensure_ascii=False))
 
